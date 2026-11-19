@@ -169,6 +169,12 @@
           </div>
         </div>
 
+        <!-- スタートボタン（スクロール不要で即開始できるよう設定の上に配置） -->
+        <button id="btn-start-training" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-600 to-emerald-600 hover:brightness-110 active:scale-[0.99] text-white font-extrabold text-base sm:text-lg shadow-lg shadow-indigo-300/50 transition flex items-center justify-center gap-2">
+          <span>🎙️</span>
+          <span>Stage 1（瞬間英作文）をスタート！</span>
+        </button>
+
         <!-- トレーニング設定カード -->
         <div class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-4">
           <div class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">トレーニング設定</div>
@@ -238,12 +244,6 @@
         <div id="home-mic-warning" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-3.5 text-xs text-amber-900 leading-relaxed">
           ⚠️ お使いのブラウザは音声認識（Web Speech API）に非対応のようです。トレーニング画面の下部にある<strong>キーボード入力欄</strong>からそのまま練習できます！（音声入力はChrome / Edge / Safari推奨）
         </div>
-
-        <!-- スタートボタン -->
-        <button id="btn-start-training" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-600 to-emerald-600 hover:brightness-110 active:scale-[0.99] text-white font-extrabold text-base sm:text-lg shadow-lg shadow-indigo-300/50 transition flex items-center justify-center gap-2">
-          <span>🎙️</span>
-          <span>Stage 1（瞬間英作文）をスタート！</span>
-        </button>
       </section>
 
       <!-- ======================================== -->
@@ -370,6 +370,12 @@
               <span id="result-speed-badge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-white/80 shrink-0">⚡ 0.05秒即判定</span>
             </div>
 
+            <!-- 次へボタン（スクロールせずにすぐ進めるよう上部に配置） -->
+            <button id="btn-next-question" class="w-full py-3.5 px-6 rounded-2xl bg-slate-900 hover:bg-indigo-700 text-white font-extrabold text-sm sm:text-base shadow-md transition flex items-center justify-center gap-2">
+              <span id="btn-next-text">次の問題へ</span>
+              <span>→</span>
+            </button>
+
             <!-- あなたの発話 -->
             <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80">
               <div class="text-[11px] font-bold text-slate-400 mb-0.5">あなたの回答</div>
@@ -400,12 +406,6 @@
                 <p id="result-advice" class="text-xs sm:text-sm text-emerald-950 font-medium leading-relaxed"></p>
               </div>
             </div>
-
-            <!-- 次へボタン -->
-            <button id="btn-next-question" class="w-full py-3.5 px-6 rounded-2xl bg-slate-900 hover:bg-indigo-700 text-white font-extrabold text-sm sm:text-base shadow-md transition flex items-center justify-center gap-2">
-              <span id="btn-next-text">次の問題へ</span>
-              <span>→</span>
-            </button>
           </div>
         </div>
       </section>
