@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>英語脳アウトプット道場 v5 | 外出し・アプリ化対応版</title>
+  <title>英語脳アウトプット道場 v6 | 3ステージ英会話トレーニング</title>
 
   <!-- PWA / スタンドアロンアプリ化メタタグ -->
   <meta name="theme-color" content="#4f46e5" />
@@ -77,9 +77,9 @@
         <div class="truncate">
           <div class="flex items-center gap-1.5">
             <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 leading-tight truncate">英語脳アウトプット道場</h1>
-            <span class="px-1.5 py-0.5 rounded-md bg-gradient-to-r from-indigo-600 to-emerald-600 text-white text-[10px] font-extrabold shrink-0">v5</span>
+            <span class="px-1.5 py-0.5 rounded-md bg-gradient-to-r from-indigo-600 to-emerald-600 text-white text-[10px] font-extrabold shrink-0">v6</span>
           </div>
-          <p class="text-[11px] text-slate-500 font-medium truncate">超高速判定 × アプリ化対応</p>
+          <p class="text-[11px] text-slate-500 font-medium truncate">瞬間英作文 × イラスト × 即答会話</p>
         </div>
       </button>
 
@@ -145,7 +145,7 @@
               </span>
               <h2 id="home-topic-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">want to ～</h2>
             </div>
-            <span class="px-2.5 py-1 rounded-xl bg-slate-100 text-slate-600 text-xs font-extrabold shrink-0">全5問 × 2ステージ</span>
+            <span class="px-2.5 py-1 rounded-xl bg-slate-100 text-slate-600 text-xs font-extrabold shrink-0">全5問 × 3ステージ</span>
           </div>
 
           <p id="home-topic-desc" class="text-xs sm:text-sm text-slate-600 leading-relaxed"></p>
@@ -318,6 +318,39 @@
             <div id="jp-hint-box" class="hidden text-center text-sm font-extrabold text-amber-900 bg-amber-50/90 border border-amber-200 rounded-xl px-3 py-2"></div>
           </div>
 
+          <!-- Stage 3：ディスカッション（音声リスニング＆即答） -->
+          <div id="stage3-prompt-area" class="hidden py-4 sm:py-6 text-center space-y-4">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-50 border border-violet-200 text-violet-700 text-xs font-extrabold">
+              <span>🎧</span>
+              <span>リスニング＆即答ディスカッション</span>
+            </div>
+
+            <!-- 相手スピーカーのビジュアル -->
+            <div class="flex flex-col items-center justify-center gap-3 py-2">
+              <div class="relative flex items-center justify-center">
+                <span id="stage3-speaker-pulse" class="hidden absolute w-24 h-24 rounded-full bg-violet-400 mic-pulse-active"></span>
+                <div id="stage3-speaker-avatar" class="relative z-10 w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white flex items-center justify-center text-4xl shadow-lg shadow-violet-200 transition">
+                  🗣️
+                </div>
+              </div>
+              <p id="stage3-listen-status" class="text-sm sm:text-base font-extrabold text-slate-800">
+                相手の英語をよく聞いて、すぐに答えよう！
+              </p>
+              <p class="text-xs text-slate-500">※リスニング練習のため、質問の英文・日本語訳は答え合わせ後に表示されます</p>
+            </div>
+
+            <!-- 聞き直し＆緊急ヒントボタン -->
+            <div class="flex flex-wrap items-center justify-center gap-2">
+              <button id="btn-replay-prompt" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-extrabold shadow-sm transition flex items-center gap-1.5">
+                <span>🔊</span>
+                <span>質問をもう一度聞く</span>
+              </button>
+              <button id="btn-stage3-speed-toggle" class="px-3 py-2 rounded-xl bg-white hover:bg-violet-50 border border-violet-200 text-violet-700 text-xs font-extrabold transition">1.0x</button>
+              <button id="btn-show-prompt-hint" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-amber-50 text-slate-600 hover:text-amber-800 text-xs font-bold transition">💡 質問の英文をチラ見</button>
+            </div>
+            <div id="stage3-prompt-hint-box" class="hidden text-center text-sm font-extrabold text-violet-900 bg-violet-50/90 border border-violet-200 rounded-xl px-4 py-2.5"></div>
+          </div>
+
           <!-- 音声入力＆文字起こしエリア -->
           <div id="input-area" class="pt-2 space-y-4">
             <!-- ライブ文字起こし表示 -->
@@ -382,6 +415,22 @@
               <div id="result-user-text" class="text-sm sm:text-base font-bold text-slate-700"></div>
             </div>
 
+            <!-- Stage 3専用：相手の質問（英文＆日本語訳） -->
+            <div id="result-stage3-prompt-box" class="hidden bg-violet-50/80 rounded-2xl p-4 border border-violet-200/80 space-y-1.5">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[11px] font-extrabold text-violet-600 uppercase flex items-center gap-1">
+                  <span>🗣️</span>
+                  <span>相手の質問（リスニング答え合わせ）</span>
+                </span>
+                <button id="btn-result-play-prompt" class="px-2.5 py-1 rounded-lg bg-white hover:bg-violet-100 border border-violet-200 text-violet-700 text-[11px] font-extrabold transition flex items-center gap-1">
+                  <span>🔊</span>
+                  <span>質問を聞く</span>
+                </button>
+              </div>
+              <div id="result-prompt-en" class="text-base sm:text-lg font-extrabold text-slate-900"></div>
+              <div id="result-prompt-jp" class="text-xs font-bold text-slate-600"></div>
+            </div>
+
             <!-- お手本英文＆音声ボタン -->
             <div class="bg-indigo-50/70 rounded-2xl p-4 border border-indigo-100 space-y-2.5">
               <div class="flex items-center justify-between gap-2">
@@ -406,29 +455,38 @@
                 <p id="result-advice" class="text-xs sm:text-sm text-emerald-950 font-medium leading-relaxed"></p>
               </div>
             </div>
+
+            <!-- 違う言い回し・ネイティブ表現（Stage 3や別表現がある場合） -->
+            <div id="result-alt-box" class="hidden bg-amber-50/80 rounded-2xl p-4 border border-amber-200/80 flex items-start gap-2.5">
+              <span class="text-lg shrink-0">💬</span>
+              <div class="flex-1 min-w-0">
+                <div class="text-[11px] font-extrabold text-amber-700 mb-0.5">こんな言い回しでも通じるよ！</div>
+                <p id="result-alt-text" class="text-xs sm:text-sm text-amber-950 font-bold leading-relaxed"></p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- ======================================== -->
-      <!-- 3. Stage 1 → Stage 2 トランジション画面 -->
+      <!-- 3. ステージ間トランジション画面 (1→2 / 2→3) -->
       <!-- ======================================== -->
       <section id="screen-transition" class="hidden space-y-5 animate-fade-up">
         <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-md text-center space-y-4">
-          <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-3xl shadow-lg shadow-emerald-200">
+          <div id="trans-hero-icon" class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-3xl shadow-lg shadow-emerald-200">
             🎉
           </div>
           <div>
-            <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">STAGE 1 CLEAR!</span>
-            <h2 class="text-2xl font-extrabold text-slate-900 mt-2">瞬間英作文を全問クリア！</h2>
-            <p class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
+            <span id="trans-badge" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">STAGE 1 CLEAR!</span>
+            <h2 id="trans-title" class="text-2xl font-extrabold text-slate-900 mt-2">瞬間英作文を全問クリア！</h2>
+            <p id="trans-desc" class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
               次は <strong>Stage 2（イメージ直結モード）</strong>！<br />
               日本語を消して、シャッフルされたイラストだけを見て英語を口から出そう！
             </p>
           </div>
 
-          <!-- イラスト準備状況 -->
-          <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 space-y-3 text-left">
+          <!-- イラスト準備状況（Stage 1→2のみ表示） -->
+          <div id="trans-illust-panel" class="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 space-y-3 text-left">
             <div class="flex items-center justify-between text-xs font-extrabold">
               <span id="trans-img-status" class="text-slate-700">イラストの準備中...</span>
               <span id="trans-img-count" class="text-indigo-600">0 / 5</span>
@@ -440,9 +498,22 @@
             <p id="trans-ready-hint" class="hidden text-[11px] text-slate-500 text-center">※残りの生成を待たずに今すぐスタートすることもできます</p>
           </div>
 
-          <button id="btn-start-stage2" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-extrabold text-base shadow-lg shadow-emerald-200 transition flex items-center justify-center gap-2">
-            <span>🎨</span>
-            <span>Stage 2（イメージ直結）へ進む！</span>
+          <!-- Stage 3 事前ガイド（Stage 2→3のみ表示） -->
+          <div id="trans-stage3-panel" class="hidden bg-violet-50/80 rounded-2xl p-4 border border-violet-200/80 text-left space-y-2 text-xs text-violet-950 leading-relaxed">
+            <div class="font-extrabold text-violet-700 flex items-center gap-1.5">
+              <span>🎧</span>
+              <span>Stage 3（ディスカッション）のルール</span>
+            </div>
+            <ul class="list-disc pl-4 space-y-1 font-medium">
+              <li>相手が<strong>英語の音声だけ</strong>で質問してきます（文字は表示されません）。</li>
+              <li>質問を聞き終わったら自動でマイク＆タイマーがスタート！</li>
+              <li>今練習したフレーズを使って、素早く英語で返答しよう！</li>
+            </ul>
+          </div>
+
+          <button id="btn-start-next-stage" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-extrabold text-base shadow-lg shadow-emerald-200 transition flex items-center justify-center gap-2">
+            <span id="btn-start-next-icon">🎨</span>
+            <span id="btn-start-next-label">Stage 2（イメージ直結）へ進む！</span>
           </button>
         </div>
       </section>
@@ -646,6 +717,9 @@
               "I want to drink a cup of coffee"
             ],
             advice: "バッチリ！会話では want to を「ワナ (wanna)」のように滑らかに繋げて発音するとぐっとネイティブらしくなるよ。",
+            promptEn: "What would you like to drink?",
+            promptJp: "何かお飲み物はいかがですか？",
+            altExpression: "I'd like some coffee, please. / Could I have a coffee?",
             visualCueLabel: "💭 吹き出し＝「〜したい (want to)」",
             sceneIcons: ["😮‍💨", "💭", "☕"],
             sceneDescription: "ホッとひと息 → 湯気の立つマグカップ",
@@ -665,6 +739,9 @@
               "I want to buy some new shoes"
             ],
             advice: "Good! shoes の語尾の s は「ズ」と濁らせて、want to buy をひと息で言うとリズムよく聞こえるよ。",
+            promptEn: "Are you looking for anything at the mall today?",
+            promptJp: "今日はショッピングモールで何か探しているものがあるの？",
+            altExpression: "I'm thinking of getting a new pair of shoes. / I need new shoes.",
             visualCueLabel: "💭 吹き出し＝「〜したい (want to)」",
             sceneIcons: ["👛", "💭", "👟✨"],
             sceneDescription: "お財布を持って → ピカピカのスニーカー",
@@ -683,6 +760,9 @@
               "I wanna visit Kyoto"
             ],
             advice: "いいね！go to は「ゴートゥ」と切らずに「ゴゥトゥ」と軽く繋げて発音するのがポイントだよ。",
+            promptEn: "Where would you like to travel next?",
+            promptJp: "次はどこへ旅行してみたいですか？",
+            altExpression: "I'd love to visit Kyoto. / Kyoto is at the top of my list.",
             visualCueLabel: "💭 吹き出し＝「〜したい (want to)」",
             sceneIcons: ["🤩", "💭", "⛩️🌸"],
             sceneDescription: "旅行へのあこがれ → 朱色の五重塔と桜の古都",
@@ -701,6 +781,9 @@
               "I want to speak good English"
             ],
             advice: "ナイス！speak English は語尾の k と E が繋がって「スピーキングリッシュ」とリンキングすると超自然だよ。",
+            promptEn: "What is your goal for studying English?",
+            promptJp: "英語を勉強する目標は何ですか？",
+            altExpression: "I want to become fluent in English. / I'd like to speak English smoothly.",
             visualCueLabel: "💭 吹き出し＝「〜したい (want to)」",
             sceneIcons: ["✨", "💭", "🗣️🌍"],
             sceneDescription: "キラキラした目 → 海外の友達とスラスラ会話",
@@ -720,6 +803,9 @@
               "I want to go to bed early"
             ],
             advice: "完璧！bed early は d と e が繋がって「ベダーリー」のように滑らかに発音してみよう。",
+            promptEn: "You look tired. What are your plans for tonight?",
+            promptJp: "疲れて見えるね。今夜の予定は？",
+            altExpression: "I'm going to turn in early tonight. / I just want to get some sleep early.",
             visualCueLabel: "💭 吹き出し＝「〜したい (want to)」",
             sceneIcons: ["🥱", "💭", "🛌🌙"],
             sceneDescription: "眠そうなあくび → まだ早い時間のふかふかベッド",
@@ -747,6 +833,9 @@
               "Would you open the window"
             ],
             advice: "素晴らしい！Could you は「クッジュ」と繋げて発音し、語尾を少し上げると丁寧で自然な響きになるよ。",
+            promptEn: "It's getting a little warm in here. Is there anything I can do?",
+            promptJp: "ここ少し暑くなってきたね。何かしようか？",
+            altExpression: "Would you mind opening the window? / Can you crack the window open?",
             visualCueLabel: "🙏 丁寧なジェスチャー＝「〜していただけますか？ (Could you)」",
             sceneIcons: ["🙏", "👉", "🪟🌿"],
             sceneDescription: "閉まったガラスに向かって丁寧にお願い",
@@ -766,6 +855,9 @@
               "Could you hand me the salt"
             ],
             advice: "お見事！テーブル越しに何かを取ってほしい時は take ではなく pass を使うのがネイティブの定番だよ。",
+            promptEn: "How is your food? Do you need anything from this side of the table?",
+            promptJp: "料理はどう？こっち側から何か必要なものはある？",
+            altExpression: "Can I have the salt, please? / Would you pass the salt?",
             visualCueLabel: "🙏 丁寧なジェスチャー＝「〜していただけますか？ (Could you)」",
             sceneIcons: ["🍽️", "🙏", "🧂"],
             sceneDescription: "食卓の向こう側にある調味料を指してお願い",
@@ -787,6 +879,9 @@
               "Can you take a picture"
             ],
             advice: "バッチリ！take a は「テイカ」と繋げて発音しよう。旅行先でめちゃくちゃ使えるフレーズだね！",
+            promptEn: "What a great view! Do you need any help?",
+            promptJp: "素晴らしい景色ですね！何かお手伝いしましょうか？",
+            altExpression: "Would you mind taking a photo of us? / Can you snap a quick picture?",
             visualCueLabel: "🙏 丁寧なジェスチャー＝「〜していただけますか？ (Could you)」",
             sceneIcons: ["🏞️", "🙏", "📸"],
             sceneDescription: "観光地でスマホを差し出しながら丁寧にお願い",
@@ -806,6 +901,9 @@
               "Could you please help me carry this box"
             ],
             advice: "ナイス！help me carry は「ヘルミーキャリー」と滑らかに繋げると、スムーズに依頼できるよ。",
+            promptEn: "Whoa, that looks really heavy! Do you need a hand?",
+            promptJp: "うわ、すごく重そうだね！手伝おうか？",
+            altExpression: "Could you give me a hand with this box? / Can you help me lift this?",
             visualCueLabel: "🙏 丁寧なジェスチャー＝「〜していただけますか？ (Could you)」",
             sceneIcons: ["💦", "🙏", "📦"],
             sceneDescription: "重そうな大きな段ボールを抱えて助けを求める",
@@ -826,6 +924,9 @@
               "Can you speak more slowly"
             ],
             advice: "完璧！オンライン英会話や海外旅行での最強お守りフレーズ。slowly の s をはっきり出そう。",
+            promptEn: "So we're heading out right after lunch—did you catch all of that?",
+            promptJp: "それでランチのすぐあとに出発するんだけど…今の聞き取れた？",
+            altExpression: "Sorry, could you slow down a bit? / Would you mind speaking a little slower?",
             visualCueLabel: "🙏 丁寧なジェスチャー＝「〜していただけますか？ (Could you)」",
             sceneIcons: ["🗣️💨", "🙏", "🐢"],
             sceneDescription: "早口の相手に対して、手のひらを下げて落ち着いてお願い",
@@ -854,6 +955,9 @@
               "I'm thinking about getting a new laptop"
             ],
             advice: "いいね！thinking about は g と a が繋がって「シンキンガバウト」のように滑らかに発音するよ。",
+            promptEn: "Your computer looks pretty old. What are you going to do?",
+            promptJp: "パソコン結構古そうだね。どうするつもり？",
+            altExpression: "I'm considering getting a new laptop. / I might buy a new laptop soon.",
             visualCueLabel: "🤔 顎に手＋想像の雲＝「〜しようか考えている (thinking about)」",
             sceneIcons: ["🤔", "☁️", "💻✨"],
             sceneDescription: "顎に手を当てて想像 → キラキラの最新ノートPC",
@@ -872,6 +976,9 @@
               "I'm thinking about cooking on the weekend"
             ],
             advice: "ナイス！about の語尾の t は強く出しすぎず、cooking へ一気に繋げると自然なリズムになるよ。",
+            promptEn: "Do you have any plans for this weekend?",
+            promptJp: "今週末は何か予定がありますか？",
+            altExpression: "I might do some cooking this weekend. / I'm planning to cook at home.",
             visualCueLabel: "🤔 顎に手＋想像の雲＝「〜しようか考えている (thinking about)」",
             sceneIcons: ["🤔", "📅", "🍳🥦"],
             sceneDescription: "土日の予定を想像 → エプロン姿でフライパン",
@@ -891,6 +998,9 @@
               "I'm thinking about going to the gym"
             ],
             advice: "素晴らしい！「ジムに入会して通う」は join a gym が超ナチュラル。joining a は「ジョイニンガ」と繋げよう。",
+            promptEn: "You said you want to get more exercise, right? Any ideas?",
+            promptJp: "もっと運動したいって言ってたよね？何か考えてる？",
+            altExpression: "I'm considering signing up for a gym. / I might start going to the gym.",
             visualCueLabel: "🤔 顎に手＋想像の雲＝「〜しようか考えている (thinking about)」",
             sceneIcons: ["🤔", "☁️", "🏋️‍♂️"],
             sceneDescription: "運動不足を思案 → ダンベルとランニングマシン",
@@ -911,6 +1021,9 @@
               "I'm thinking about taking a trip to Hokkaido"
             ],
             advice: "バッチリ！traveling to は「トラベリントゥ」と軽やかに繋げよう。going to でもしっかり通じるよ。",
+            promptEn: "Where are you planning to go for your next vacation?",
+            promptJp: "次の休みはどこへ行く予定ですか？",
+            altExpression: "I'm thinking of taking a trip to Hokkaido. / I might head to Hokkaido.",
             visualCueLabel: "🤔 顎に手＋想像の雲＝「〜しようか考えている (thinking about)」",
             sceneIcons: ["🤔", "🧳", "🪻🏔️"],
             sceneDescription: "次の旅先を想像 → ラベンダー畑と北の大地",
@@ -929,6 +1042,9 @@
               "I'm thinking about cutting my hair"
             ],
             advice: "お見事！美容室で切ってもらう時は get a haircut が自然。getting a は「ゲリンガ」と発音するとネイティブ風！",
+            promptEn: "Your hair has gotten pretty long. Are you keeping it like that?",
+            promptJp: "髪だいぶ伸びたね。そのままにしておくの？",
+            altExpression: "I might get my hair cut soon. / I'm thinking of going to the salon.",
             visualCueLabel: "🤔 顎に手＋想像の雲＝「〜しようか考えている (thinking about)」",
             sceneIcons: ["🤔", "☁️", "✂️💇"],
             sceneDescription: "毛先を触りながら思案 → ハサミとさっぱりショートヘア",
@@ -956,6 +1072,9 @@
               "It takes about 10 minutes to walk to the station"
             ],
             advice: "バッチリ！It takes は t が重なるので「イッテイクス」と滑らかに1回で繋げて発音しよう。",
+            promptEn: "How long does it take to walk to the station from your house?",
+            promptJp: "家から駅まで歩いてどれくらいかかりますか？",
+            altExpression: "It's a ten-minute walk to the station. / The station is about ten minutes away on foot.",
             visualCueLabel: "⏱ 時計の10分エリア＋歩く＝「10分かかる (It takes 10 min)」",
             sceneIcons: ["⏱️10m", "🚶", "🚉"],
             sceneDescription: "時計の10分エリア ＋ てくてく歩く → 駅の改札",
@@ -975,6 +1094,9 @@
               "It takes half an hour to make curry"
             ],
             advice: "ナイス！thirty の th は舌先を軽く歯に当てて息を出すと、13 (thirteen) とクリアに聞き分けてもらえるよ。",
+            promptEn: "How long does it take to make curry?",
+            promptJp: "カレーを作るのにどれくらい時間がかかりますか？",
+            altExpression: "It takes about half an hour to cook curry. / You can make curry in thirty minutes.",
             visualCueLabel: "⏱ 時計の半分(30分)エリア＋料理＝「30分かかる (It takes 30 min)」",
             sceneIcons: ["⏱️30m", "🥘", "🍛"],
             sceneDescription: "時計の半分(30分) ＋ お鍋でコトコト煮込む",
@@ -994,6 +1116,9 @@
               "It takes one hour to go there by car"
             ],
             advice: "お見事！an hour は h を発音せず「アナウアー」と繋げて発音するのがネイティブのコツだよ。",
+            promptEn: "How long does it take to drive there?",
+            promptJp: "そこへ車で行くのにどれくらいかかりますか？",
+            altExpression: "It's about an hour's drive. / Driving there takes around an hour.",
             visualCueLabel: "⏱ 時計1周(1時間)＋車＝「1時間かかる (It takes an hour)」",
             sceneIcons: ["⏱️1h", "🚗", "🛣️"],
             sceneDescription: "時計まるっと1周 ＋ 海沿いのドライブ",
@@ -1012,6 +1137,9 @@
               "It takes about 5 minutes to get ready"
             ],
             advice: "素晴らしい！get ready は t を飲み込んで「ゲッレディ」と発音すると自然な英語のリズムになるよ。",
+            promptEn: "Are you almost ready to leave? How much time do you need?",
+            promptJp: "もう出かける準備できた？あとどれくらい時間が必要？",
+            altExpression: "I'll be ready in five minutes. / Give me five minutes to get ready.",
             visualCueLabel: "⏱ 時計の5分エリア＋お出かけ準備＝「5分かかる (It takes 5 min)」",
             sceneIcons: ["⏱️5m", "🧥", "🔑👜"],
             sceneDescription: "時計の5分エリア ＋ ジャケット・鍵・バッグを持って玄関へ",
@@ -1031,6 +1159,9 @@
               "It takes forty-five minutes by train to the airport"
             ],
             advice: "すごい！少し長い文でも「It takes 時間 / to 行動 / by 手段」と3つの塊で区切るとスラスラ言えるよ。",
+            promptEn: "How long does it take to get to the airport by train?",
+            promptJp: "空港まで電車でどれくらいかかりますか？",
+            altExpression: "It's a 45-minute train ride to the airport. / The train to the airport takes 45 minutes.",
             visualCueLabel: "⏱ 時計の45分エリア＋電車と空港＝「45分かかる (It takes 45 min)」",
             sceneIcons: ["⏱️45m", "🚆", "✈️"],
             sceneDescription: "時計の4分の3(45分) ＋ 特急列車 → ターミナルと飛行機",
@@ -1056,6 +1187,9 @@
               "I used to live in Osaka city"
             ],
             advice: "バッチリ！used to は「ユーストゥ」、live in は「リヴィン」とリンキングすると最高に自然だよ。",
+            promptEn: "You know Osaka really well! Have you ever lived there?",
+            promptJp: "大阪にすごく詳しいね！昔住んでたことがあるの？",
+            altExpression: "I lived in Osaka before. / I'm originally from Osaka.",
             visualCueLabel: "☁️ セピアの思い出雲＝「以前は〜していた (used to)」",
             sceneIcons: ["🕰️", "☁️", "🏯🏠"],
             sceneDescription: "懐かしい思い出雲 → お城と川の見える街の暮らし",
@@ -1074,6 +1208,9 @@
               "I used to play soccer often"
             ],
             advice: "ナイス！used to play をひと塊で「ユーストゥプレイ」と発声するクセをつけると反射速度が上がるよ。",
+            promptEn: "Did you play any sports when you were younger?",
+            promptJp: "若い頃に何かスポーツをしていましたか？",
+            altExpression: "I played soccer a lot back in the day. / I was on the soccer team.",
             visualCueLabel: "☁️ セピアの思い出雲＝「以前は〜していた (used to)」",
             sceneIcons: ["🕰️", "☁️", "⚽🏃"],
             sceneDescription: "懐かしい思い出雲 → 芝生の上でボールを蹴る学生時代",
@@ -1091,6 +1228,9 @@
               "I used to go running every day"
             ],
             advice: "いいね！run every は n と e が繋がって「ラネヴリ」のように聞こえるよ。リズムよく言ってみよう！",
+            promptEn: "Did you have any daily exercise habits in the past?",
+            promptJp: "昔、毎日続けていた運動習慣って何かあった？",
+            altExpression: "I went jogging every day back then. / Running every day was part of my routine.",
             visualCueLabel: "☁️ セピアの思い出雲＝「以前は〜していた (used to)」",
             sceneIcons: ["🕰️", "🌅", "🏃‍♂️💨"],
             sceneDescription: "懐かしい思い出雲 → 毎朝の公園ジョギング習慣",
@@ -1107,6 +1247,9 @@
               "I used to play piano"
             ],
             advice: "素晴らしい！楽器の前には the をつけるのが基本ルール。play the piano を1つのチャンクで覚えよう。",
+            promptEn: "Did you play any musical instruments as a kid?",
+            promptJp: "子どもの頃に何か楽器を弾いていましたか？",
+            altExpression: "I took piano lessons when I was a kid. / I played the piano back then.",
             visualCueLabel: "☁️ セピアの思い出雲＝「以前は〜していた (used to)」",
             sceneIcons: ["🕰️", "☁️", "🎹🎵"],
             sceneDescription: "懐かしい思い出雲 → 子どもの頃の音楽レッスン",
@@ -1125,6 +1268,9 @@
               "I used to stay awake late"
             ],
             advice: "お見事！「夜更かしする」は stay up late が定番表現。stay up を滑らかに繋げて言ってみよう！",
+            promptEn: "Were you a night owl in the past?",
+            promptJp: "以前は夜型人間でしたか？",
+            altExpression: "I was a real night owl before. / I often stayed up really late.",
             visualCueLabel: "☁️ セピアの思い出雲＝「以前は〜していた (used to)」",
             sceneIcons: ["🕰️", "🌙⭐", "💡🦉"],
             sceneDescription: "懐かしい思い出雲 → 満月の深夜までデスクライトで起きていた日々",
@@ -1152,15 +1298,15 @@
       userApiKey: "",
       illustrationEnabled: true,
 
-      stage: 1,                   // 1: 瞬間英作文, 2: イラスト直結
-      phase: "home",              // home | listening | evaluating | result | transition | summary
+      stage: 1,                   // 1: 瞬間英作文, 2: イラスト直結, 3: ディスカッション
+      nextStageTarget: 2,         // トランジション後に進むステージ番号
+      phase: "home",              // home | prompting | listening | evaluating | result | transition | summary
 
       queue: [],                  // 現在のステージで残っている問題リスト
       clearedIds: new Set(),      // 現ステージで正解した問題ID
       currentQuestion: null,
       isLoopRound: false,
-
-      // 音声認識 & タイマー管理
+      promptFallbackTimer: null,  // Stage 3音声終了検知の安全フォールバックタイマー
       speechSupported: !!SpeechRecognitionAPI,
       recognition: null,
       isListening: false,
@@ -1366,10 +1512,11 @@
       notes.forEach((f, i) => playTone(f, i * 0.1, i === 3 ? 0.45 : 0.18, "triangle", 0.2));
     }
 
-    /** ネイティブ英語お手本音声の再生 */
-    function speakEnglish(text) {
+    /** ネイティブ英語お手本音声の再生（終了コールバック対応） */
+    function speakEnglish(text, onComplete = null) {
       if (!("speechSynthesis" in window)) {
         showToast("このブラウザは音声読み上げに対応していません。", "warning");
+        if (typeof onComplete === "function") onComplete();
         return;
       }
       try {
@@ -1382,8 +1529,20 @@
           || voices.find(v => /en[-_]US/i.test(v.lang))
           || voices.find(v => /^en/i.test(v.lang));
         if (preferred) utter.voice = preferred;
+
+        let finished = false;
+        const finishOnce = () => {
+          if (finished) return;
+          finished = true;
+          if (typeof onComplete === "function") onComplete();
+        };
+
+        utter.onend = finishOnce;
+        utter.onerror = finishOnce;
         window.speechSynthesis.speak(utter);
-      } catch (e) {}
+      } catch (e) {
+        if (typeof onComplete === "function") onComplete();
+      }
     }
 
     // =========================================================================
@@ -1550,10 +1709,8 @@
           body: JSON.stringify(payload),
           signal: controller.signal
         });
-        clearTimeout(timeoutId);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-
         const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (!rawText) throw new Error("Empty AI response");
         const parsed = JSON.parse(rawText);
@@ -1563,23 +1720,13 @@
           via: "ai"
         };
       } catch (err) {
-        clearTimeout(timeoutId);
-        // タイムアウト・通信エラー・APIキー未設定時は即座にローカル判定へフォールバック
-        const uWords = new Set(normalizeEnglishForFastMatch(userText).split(" ").filter(Boolean));
-        const mWords = normalizeEnglishForFastMatch(question.en).split(" ").filter(Boolean);
-        let hits = 0;
-        mWords.forEach(w => { if (uWords.has(w)) hits++; });
-        const ok = mWords.length > 0 && (hits / mWords.length) >= 0.78;
-        const keyHint = (!state.userApiKey && isLikelyExternalHost())
-          ? "（※右上の「⚙️ 設定」でAPIキーを登録するとAIの柔軟な別解判定も使えます）"
-          : "";
         return {
-          isCorrect: ok,
-          advice: (ok
-            ? question.advice
-            : "惜しい！お手本音声を聞いてリズムをマネしてから、あとでもう一度リベンジしよう。") + keyHint,
+          isCorrect: false,
+          advice: "惜しい！お手本フレーズの語順や表現を声に出して確認してからリベンジしよう。",
           via: "local-fallback"
         };
+      } finally {
+        clearTimeout(timeoutId);
       }
     }
 
@@ -1601,6 +1748,9 @@
 - en: 実用的なお手本英文
 - acceptable: 0.05秒ローカル即判定用の自然な別解・短縮形バリエーション配列（3〜5個）
 - advice: 発音・リンキング・使い方の温かい日本語ワンポイントアドバイス（50〜85文字）
+- promptEn: Stage 3（英会話ディスカッション）で相手が話しかけてくる自然な英語の質問文（この質問を聞いてユーザーが en の文で自然に答えられる内容にすること）
+- promptJp: promptEn の自然な日本語訳
+- altExpression: en と同じ意味を伝えるネイティブらしい別の言い回し（英語で1〜2例）
 - visualCueLabel: 絵文字1つ＋イラストの見方ヒント（例: "💭 吹き出し＝〜したい"）
 - sceneIcons: シーンを象徴する絵文字3つの配列（例: ["😮‍💨", "💭", "☕"]）
 - sceneDescription: 日本語訳をそのまま書かずに、場面の情景を連想させる短いイメージ描写（20字以内）
@@ -1630,6 +1780,9 @@
                       items: { type: "STRING" }
                     },
                     advice: { type: "STRING" },
+                    promptEn: { type: "STRING" },
+                    promptJp: { type: "STRING" },
+                    altExpression: { type: "STRING" },
                     visualCueLabel: { type: "STRING" },
                     sceneIcons: {
                       type: "ARRAY",
@@ -1639,7 +1792,7 @@
                     imagePrompt: { type: "STRING" },
                     emoji: { type: "STRING" }
                   },
-                  required: ["jp", "en", "acceptable", "advice", "visualCueLabel", "sceneIcons", "sceneDescription", "imagePrompt", "emoji"]
+                  required: ["jp", "en", "acceptable", "advice", "promptEn", "promptJp", "altExpression", "visualCueLabel", "sceneIcons", "sceneDescription", "imagePrompt", "emoji"]
                 }
               }
             },
@@ -1678,6 +1831,9 @@
           en: q.en,
           acceptable: Array.isArray(q.acceptable) && q.acceptable.length > 0 ? q.acceptable : [q.en],
           advice: q.advice || "いいリズムで声に出せたね！お手本音声も聞いてしっかり定着させよう。",
+          promptEn: q.promptEn || "Could you tell me about that?",
+          promptJp: q.promptJp || "それについて教えてくれますか？",
+          altExpression: q.altExpression || "",
           visualCueLabel: q.visualCueLabel || "🎨 イラストの状況を英語で表現してみよう",
           sceneIcons: Array.isArray(q.sceneIcons) && q.sceneIcons.length > 0 ? q.sceneIcons.slice(0, 3) : [q.emoji || "💬"],
           sceneDescription: q.sceneDescription || "このシチュエーションを英語で表現！",
@@ -1898,6 +2054,14 @@
       cueHintBox: document.getElementById("cue-hint-box"),
       jpHintBox: document.getElementById("jp-hint-box"),
 
+      stage3PromptArea: document.getElementById("stage3-prompt-area"),
+      stage3SpeakerPulse: document.getElementById("stage3-speaker-pulse"),
+      stage3ListenStatus: document.getElementById("stage3-listen-status"),
+      btnReplayPrompt: document.getElementById("btn-replay-prompt"),
+      btnStage3SpeedToggle: document.getElementById("btn-stage3-speed-toggle"),
+      btnShowPromptHint: document.getElementById("btn-show-prompt-hint"),
+      stage3PromptHintBox: document.getElementById("stage3-prompt-hint-box"),
+
       inputArea: document.getElementById("input-area"),
       transcriptDisplay: document.getElementById("transcript-display"),
       btnMic: document.getElementById("btn-mic"),
@@ -1916,21 +2080,35 @@
       resultSubtitle: document.getElementById("result-subtitle"),
       resultSpeedBadge: document.getElementById("result-speed-badge"),
       resultUserText: document.getElementById("result-user-text"),
+      resultStage3PromptBox: document.getElementById("result-stage3-prompt-box"),
+      btnResultPlayPrompt: document.getElementById("btn-result-play-prompt"),
+      resultPromptEn: document.getElementById("result-prompt-en"),
+      resultPromptJp: document.getElementById("result-prompt-jp"),
       resultCorrectEn: document.getElementById("result-correct-en"),
       resultJp: document.getElementById("result-jp"),
       resultAdvice: document.getElementById("result-advice"),
+      resultAltBox: document.getElementById("result-alt-box"),
+      resultAltText: document.getElementById("result-alt-text"),
       btnPlayAudio: document.getElementById("btn-play-audio"),
       btnResultSpeedToggle: document.getElementById("btn-result-speed-toggle"),
       btnNextQuestion: document.getElementById("btn-next-question"),
       btnNextText: document.getElementById("btn-next-text"),
 
       // トランジション画面
+      transHeroIcon: document.getElementById("trans-hero-icon"),
+      transBadge: document.getElementById("trans-badge"),
+      transTitle: document.getElementById("trans-title"),
+      transDesc: document.getElementById("trans-desc"),
+      transIllustPanel: document.getElementById("trans-illust-panel"),
+      transStage3Panel: document.getElementById("trans-stage3-panel"),
       transImgStatus: document.getElementById("trans-img-status"),
       transImgCount: document.getElementById("trans-img-count"),
       transImgBar: document.getElementById("trans-img-bar"),
       transImgGrid: document.getElementById("trans-img-grid"),
       transReadyHint: document.getElementById("trans-ready-hint"),
-      btnStartStage2: document.getElementById("btn-start-stage2"),
+      btnStartNextStage: document.getElementById("btn-start-next-stage"),
+      btnStartNextIcon: document.getElementById("btn-start-next-icon"),
+      btnStartNextLabel: document.getElementById("btn-start-next-label"),
 
       // リザルト画面
       summaryTopicTitle: document.getElementById("summary-topic-title"),
@@ -2105,61 +2283,8 @@
           : `tts-speed-btn px-3 py-1.5 rounded-lg text-xs font-extrabold transition ${active ? "bg-white text-indigo-700 shadow-sm" : "text-slate-500 hover:text-slate-800"}`;
       });
       el.btnResultSpeedToggle.textContent = state.ttsSpeed === 0.75 ? "0.75x" : "1.0x";
-    }
-
-    /** イラストON/OFFトグル＆APIキー状態のUI同期 */
-    function syncSettingsUI() {
-      el.toggleIllustHome.checked = state.illustrationEnabled;
-      el.toggleIllustModal.checked = state.illustrationEnabled;
-
-      if (state.illustrationEnabled) {
-        el.homeIllustModeBadge.textContent = "ON";
-        el.homeIllustModeBadge.className = "px-1.5 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200";
-      } else {
-        el.homeIllustModeBadge.textContent = "OFF（無料・爆速）";
-        el.homeIllustModeBadge.className = "px-1.5 py-0.5 rounded-md text-[10px] font-extrabold bg-teal-50 text-teal-700 border border-teal-200";
-      }
-
-      const hasUserKey = !!state.userApiKey;
-      el.modalApikeyStatus.textContent = hasUserKey ? "登録済み" : "未設定";
-      el.modalApikeyStatus.className = hasUserKey
-        ? "px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800"
-        : "px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600";
-
-      const showExternalPrompt = isLikelyExternalHost() && !hasUserKey;
-      el.settingsBadgeDot.classList.toggle("hidden", !showExternalPrompt);
-      el.homeApikeyBanner.classList.toggle("hidden", !showExternalPrompt);
-    }
-
-    function openSettingsModal() {
-      el.inputApiKey.value = state.userApiKey || "";
-      el.inputApiKey.type = "password";
-      el.apikeyTestResult.classList.add("hidden");
-      syncSettingsUI();
-      el.modalSettings.classList.remove("hidden");
-    }
-
-    function closeSettingsModal() {
-      el.modalSettings.classList.add("hidden");
-    }
-
-    function setIllustrationEnabled(enabled) {
-      state.illustrationEnabled = enabled;
-      saveUserPrefs();
-      syncSettingsUI();
-      updateBgGenUI();
-      if (enabled) {
-        showToast("🎨 AIイラスト生成をONにしました！裏側で準備を始めます。", "success");
-        startBackgroundImagePreload();
-      } else {
-        state.bgGenRunId += 1;
-        showToast("🍃 情景イメージカードモード（完全無料・待ち時間ゼロ）に切り替えました！", "info");
-      }
-      if (state.stage === 2 && state.currentQuestion) {
-        renderStage2IllustrationBox(state.currentQuestion);
-      }
-      if (state.phase === "summary") {
-        renderSummaryList();
+      if (el.btnStage3SpeedToggle) {
+        el.btnStage3SpeedToggle.textContent = state.ttsSpeed === 0.75 ? "0.75x" : "1.0x";
       }
     }
 
@@ -2205,6 +2330,66 @@
 
       if (!state.speechSupported) {
         el.homeMicWarning.classList.remove("hidden");
+      }
+    }
+
+    /** 設定モーダル・APIキー状態・イラストON/OFF表示を同期 */
+    function syncSettingsUI() {
+      const hasUserKey = !!state.userApiKey;
+      el.toggleIllustHome.checked = state.illustrationEnabled;
+      el.toggleIllustModal.checked = state.illustrationEnabled;
+
+      if (state.illustrationEnabled) {
+        el.homeIllustModeBadge.textContent = "ON";
+        el.homeIllustModeBadge.className = "px-1.5 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200";
+      } else {
+        el.homeIllustModeBadge.textContent = "OFF（無料・爆速）";
+        el.homeIllustModeBadge.className = "px-1.5 py-0.5 rounded-md text-[10px] font-extrabold bg-teal-50 text-teal-700 border border-teal-200";
+      }
+
+      if (hasUserKey) {
+        el.modalApikeyStatus.textContent = "設定済み";
+        el.modalApikeyStatus.className = "px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700";
+        el.settingsBadgeDot.classList.add("hidden");
+        el.homeApikeyBanner.classList.add("hidden");
+      } else {
+        el.modalApikeyStatus.textContent = "未設定";
+        el.modalApikeyStatus.className = "px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600";
+        const showHint = isLikelyExternalHost();
+        el.settingsBadgeDot.classList.toggle("hidden", !showHint);
+        el.homeApikeyBanner.classList.toggle("hidden", !showHint);
+      }
+
+      updateBgGenUI();
+    }
+
+    function openSettingsModal() {
+      el.inputApiKey.value = state.userApiKey || "";
+      el.inputApiKey.type = "password";
+      el.apikeyTestResult.classList.add("hidden");
+      syncSettingsUI();
+      el.modalSettings.classList.remove("hidden");
+    }
+
+    function closeSettingsModal() {
+      el.modalSettings.classList.add("hidden");
+    }
+
+    function setIllustrationEnabled(enabled) {
+      state.illustrationEnabled = !!enabled;
+      saveUserPrefs();
+      syncSettingsUI();
+      if (state.illustrationEnabled) {
+        startBackgroundImagePreload();
+        showToast("🎨 AIイラスト生成をONにしました", "info");
+      } else {
+        showToast("🍃 情景イメージカードモード（無料・待ち時間ゼロ）に切り替えました", "success");
+      }
+      if (state.stage === 2 && state.currentQuestion) {
+        renderStage2IllustrationBox(state.currentQuestion);
+      }
+      if (state.phase === "summary") {
+        renderSummaryList();
       }
     }
 
@@ -2438,7 +2623,7 @@
       state.stage = stageNum;
       state.clearedIds = new Set();
       state.isLoopRound = false;
-      state.queue = stageNum === 2
+      state.queue = stageNum >= 2
         ? shuffleArray(state.currentTopic.questions)
         : [...state.currentTopic.questions];
 
@@ -2446,13 +2631,66 @@
       if (stageNum === 1) {
         el.trainStageBadge.textContent = "Stage 1：瞬間英作文";
         el.trainStageBadge.className = "px-2.5 py-1 rounded-full text-xs font-extrabold bg-indigo-100 text-indigo-700";
-      } else {
+      } else if (stageNum === 2) {
         el.trainStageBadge.textContent = "Stage 2：イメージ直結";
         el.trainStageBadge.className = "px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-700";
+      } else {
+        el.trainStageBadge.textContent = "Stage 3：ディスカッション";
+        el.trainStageBadge.className = "px-2.5 py-1 rounded-full text-xs font-extrabold bg-violet-100 text-violet-700";
       }
 
       showScreen("training");
       loadNextQuestion();
+    }
+
+    function clearPromptFallbackTimer() {
+      if (state.promptFallbackTimer) {
+        clearTimeout(state.promptFallbackTimer);
+        state.promptFallbackTimer = null;
+      }
+    }
+
+    /** Stage 3：質問の英語音声を読み上げ、終了と同時にタイマー＆マイクを起動 */
+    function playStage3PromptAndBeginAnswer(question, isReplay = false) {
+      clearPromptFallbackTimer();
+      stopListening();
+      stopTimer();
+
+      state.phase = "prompting";
+      el.stage3SpeakerPulse.classList.remove("hidden");
+      el.stage3ListenStatus.textContent = "🔊 相手が話しています... よく聞いてね！";
+      el.transcriptDisplay.textContent = "質問を聞き終わったら自動でマイクがONになります...";
+      el.transcriptDisplay.className = "text-sm sm:text-base font-bold text-violet-500";
+      el.timerStatusText.textContent = "リスニング中";
+      el.timerText.textContent = state.timerSeconds === 0 ? "∞" : String(state.timerSeconds);
+      el.timerRing.style.stroke = "#8b5cf6";
+      el.timerRing.style.strokeDashoffset = "0";
+
+      const promptText = question.promptEn || "Could you tell me about that?";
+      let startedTurn = false;
+      const beginAnswering = () => {
+        if (startedTurn) return;
+        startedTurn = true;
+        clearPromptFallbackTimer();
+        if (state.phase !== "prompting" || state.currentQuestion !== question) return;
+
+        state.phase = "listening";
+        el.stage3SpeakerPulse.classList.add("hidden");
+        el.stage3ListenStatus.textContent = "🎙️ 今すぐ英語で答えよう！";
+        el.transcriptDisplay.textContent = "マイクに向かって英語で返答してください...";
+        el.transcriptDisplay.className = "text-base sm:text-lg font-bold text-slate-400";
+
+        startQuestionTimer();
+        if (state.speechSupported) {
+          startListening();
+        }
+      };
+
+      // 一部ブラウザで speechSynthesis の onend が発火しない場合の安全フォールバック
+      const estimatedMs = Math.min(9000, Math.max(3000, Math.round((promptText.length * 85) / state.ttsSpeed) + 1500));
+      state.promptFallbackTimer = setTimeout(beginAnswering, estimatedMs);
+
+      speakEnglish(promptText, beginAnswering);
     }
 
     function updateProgressBar() {
@@ -2465,19 +2703,24 @@
     }
 
     function loadNextQuestion() {
+      clearPromptFallbackTimer();
       stopListening();
       stopTimer();
+      if ("speechSynthesis" in window) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+      }
 
       if (state.queue.length === 0) {
         if (state.stage === 1) {
-          enterTransitionScreen();
+          enterTransitionScreen(2);
+        } else if (state.stage === 2) {
+          enterTransitionScreen(3);
         } else {
           enterSummaryScreen();
         }
         return;
       }
 
-      state.phase = "listening";
       state.currentQuestion = state.queue[0];
       state.transcriptFinal = "";
       state.transcriptInterim = "";
@@ -2487,19 +2730,23 @@
       const q = state.currentQuestion;
       el.questionNumberBadge.textContent = `Q${q.id}`;
 
-      // Stage 1 vs Stage 2 の表示切替
+      // Stage 1 / Stage 2 / Stage 3 の表示切替
+      el.stage1PromptArea.classList.toggle("hidden", state.stage !== 1);
+      el.stage2PromptArea.classList.toggle("hidden", state.stage !== 2);
+      el.stage3PromptArea.classList.toggle("hidden", state.stage !== 3);
+
       if (state.stage === 1) {
-        el.stage1PromptArea.classList.remove("hidden");
-        el.stage2PromptArea.classList.add("hidden");
         el.questionJp.textContent = q.jp;
-      } else {
-        el.stage1PromptArea.classList.add("hidden");
-        el.stage2PromptArea.classList.remove("hidden");
+      } else if (state.stage === 2) {
         renderStage2IllustrationBox(q);
         el.cueHintBox.classList.add("hidden");
         el.jpHintBox.classList.add("hidden");
         el.cueHintBox.textContent = q.visualCueLabel || "";
         el.jpHintBox.textContent = q.jp;
+      } else {
+        el.stage3PromptHintBox.classList.add("hidden");
+        el.stage3PromptHintBox.textContent = q.promptEn || "";
+        syncSpeedButtonsUI();
       }
 
       // 入力エリアをリセットして表示
@@ -2508,12 +2755,17 @@
       el.resultArea.classList.add("hidden");
       el.btnEvalNow.classList.add("hidden");
       el.keyboardInput.value = "";
-      el.transcriptDisplay.textContent = "マイクに向かって英語で話してください...";
-      el.transcriptDisplay.className = "text-base sm:text-lg font-bold text-slate-400";
 
-      startQuestionTimer();
-      if (state.speechSupported) {
-        startListening();
+      if (state.stage === 3) {
+        playStage3PromptAndBeginAnswer(q, false);
+      } else {
+        state.phase = "listening";
+        el.transcriptDisplay.textContent = "マイクに向かって英語で話してください...";
+        el.transcriptDisplay.className = "text-base sm:text-lg font-bold text-slate-400";
+        startQuestionTimer();
+        if (state.speechSupported) {
+          startListening();
+        }
       }
     }
 
@@ -2529,9 +2781,14 @@
     }
 
     async function submitAnswer(rawAnswer) {
-      if (state.phase !== "listening") return;
+      if (state.phase !== "listening" && state.phase !== "prompting") return;
+      clearPromptFallbackTimer();
       stopListening();
       stopTimer();
+      el.stage3SpeakerPulse.classList.add("hidden");
+      if ("speechSynthesis" in window) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+      }
 
       const answer = (rawAnswer || "").trim();
       if (!answer) {
@@ -2603,15 +2860,38 @@
       };
       el.resultSpeedBadge.textContent = speedLabels[via] || "判定完了";
       el.resultUserText.textContent = userText;
+
+      // Stage 3 の場合は「相手の質問（英文＆日本語訳）」を答え合わせ表示
+      if (state.stage === 3 && q.promptEn) {
+        el.resultStage3PromptBox.classList.remove("hidden");
+        el.resultPromptEn.textContent = q.promptEn;
+        el.resultPromptJp.textContent = q.promptJp || "";
+      } else {
+        el.resultStage3PromptBox.classList.add("hidden");
+      }
+
       el.resultCorrectEn.textContent = q.en;
       el.resultJp.textContent = q.jp;
       el.resultAdvice.textContent = advice;
+
+      // 違う言い回し・ネイティブ表現（Stage 3 またはデータがある場合）
+      if (state.stage === 3 && q.altExpression) {
+        el.resultAltBox.classList.remove("hidden");
+        el.resultAltText.textContent = q.altExpression;
+      } else {
+        el.resultAltBox.classList.add("hidden");
+      }
+
       el.btnResultSpeedToggle.textContent = state.ttsSpeed === 0.75 ? "0.75x" : "1.0x";
 
       if (state.queue.length === 0) {
-        el.btnNextText.textContent = state.stage === 1
-          ? "Stage 1 クリア画面へ！"
-          : "達成リザルトを見る！";
+        if (state.stage === 1) {
+          el.btnNextText.textContent = "Stage 1 クリア画面へ！";
+        } else if (state.stage === 2) {
+          el.btnNextText.textContent = "Stage 2 クリア！最終ステージへ！";
+        } else {
+          el.btnNextText.textContent = "達成リザルトを見る！";
+        }
       } else {
         el.btnNextText.textContent = `次の問題へ（残り${state.queue.length}問）`;
       }
@@ -2620,10 +2900,38 @@
     // =========================================================================
     // 11. トランジション画面 & リザルト画面
     // =========================================================================
-    function enterTransitionScreen() {
+    function enterTransitionScreen(nextStage = 2) {
       state.phase = "transition";
+      state.nextStageTarget = nextStage;
       playFanfareSound();
-      renderTransitionGrid();
+
+      if (nextStage === 2) {
+        el.transHeroIcon.className = "w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-3xl shadow-lg shadow-emerald-200";
+        el.transHeroIcon.textContent = "🎉";
+        el.transBadge.className = "px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold";
+        el.transBadge.textContent = "STAGE 1 CLEAR!";
+        el.transTitle.textContent = "瞬間英作文を全問クリア！";
+        el.transDesc.innerHTML = "次は <strong>Stage 2（イメージ直結モード）</strong>！<br />日本語を消して、シャッフルされたイラストだけを見て英語を口から出そう！";
+        el.transIllustPanel.classList.remove("hidden");
+        el.transStage3Panel.classList.add("hidden");
+        el.btnStartNextStage.className = "w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-extrabold text-base shadow-lg shadow-emerald-200 transition flex items-center justify-center gap-2";
+        el.btnStartNextIcon.textContent = "🎨";
+        el.btnStartNextLabel.textContent = "Stage 2（イメージ直結）へ進む！";
+        renderTransitionGrid();
+      } else {
+        el.transHeroIcon.className = "w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white flex items-center justify-center text-3xl shadow-lg shadow-violet-200";
+        el.transHeroIcon.textContent = "🎧";
+        el.transBadge.className = "px-3 py-1 rounded-full bg-violet-100 text-violet-800 text-xs font-extrabold";
+        el.transBadge.textContent = "STAGE 2 CLEAR!";
+        el.transTitle.textContent = "イメージ直結を全問クリア！";
+        el.transDesc.innerHTML = "いよいよ最終 <strong>Stage 3（ディスカッション）</strong>！<br />英語音声の質問を聞き取って、練習したフレーズで素早く返答しよう！";
+        el.transIllustPanel.classList.add("hidden");
+        el.transStage3Panel.classList.remove("hidden");
+        el.btnStartNextStage.className = "w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:brightness-110 text-white font-extrabold text-base shadow-lg shadow-violet-200 transition flex items-center justify-center gap-2";
+        el.btnStartNextIcon.textContent = "🗣️";
+        el.btnStartNextLabel.textContent = "Stage 3（ディスカッション）へ進む！";
+      }
+
       showScreen("transition");
     }
 
@@ -2737,8 +3045,12 @@
     // 12. イベントリスナー設定
     // =========================================================================
     function goHome() {
+      clearPromptFallbackTimer();
       stopListening();
       stopTimer();
+      if ("speechSynthesis" in window) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+      }
       state.phase = "home";
       renderHome();
       showScreen("home");
@@ -2910,7 +3222,33 @@
     // トレーニング操作系
     el.btnStartTraining.addEventListener("click", startFullSession);
     el.btnSummaryRetry.addEventListener("click", startFullSession);
-    el.btnStartStage2.addEventListener("click", () => startStage(2));
+    el.btnStartNextStage.addEventListener("click", () => startStage(state.nextStageTarget || 2));
+
+    // Stage 3 質問の聞き直し・速度切替・ヒント表示・結果画面での質問再生
+    el.btnReplayPrompt.addEventListener("click", () => {
+      if (state.stage === 3 && state.currentQuestion && (state.phase === "listening" || state.phase === "prompting")) {
+        playStage3PromptAndBeginAnswer(state.currentQuestion, true);
+      }
+    });
+
+    el.btnStage3SpeedToggle.addEventListener("click", () => {
+      state.ttsSpeed = state.ttsSpeed === 1.0 ? 0.75 : 1.0;
+      saveUserPrefs();
+      syncSpeedButtonsUI();
+      if (state.stage === 3 && state.currentQuestion && (state.phase === "listening" || state.phase === "prompting")) {
+        playStage3PromptAndBeginAnswer(state.currentQuestion, true);
+      }
+    });
+
+    el.btnShowPromptHint.addEventListener("click", () => {
+      el.stage3PromptHintBox.classList.toggle("hidden");
+    });
+
+    el.btnResultPlayPrompt.addEventListener("click", () => {
+      if (state.currentQuestion && state.currentQuestion.promptEn) {
+        speakEnglish(state.currentQuestion.promptEn);
+      }
+    });
 
     el.btnMic.addEventListener("click", () => {
       if (state.phase !== "listening") return;
