@@ -569,11 +569,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button id="btn-copy-notion-md" class="py-2.5 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold shadow-sm transition flex items-center justify-center gap-1.5">
                 <span>📋</span>
-                <span>Notionページ用にコピー</span>
+                <span>Notion用にコピー</span>
               </button>
               <button id="btn-copy-notion-tsv" class="py-2.5 px-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 text-xs font-extrabold transition flex items-center justify-center gap-1.5">
                 <span>📊</span>
-                <span>Notionの表（1行）用にコピー</span>
+                <span>表（1行）用にコピー</span>
               </button>
             </div>
           </div>
@@ -639,12 +639,12 @@
         <!-- Notion用 一括コピーバー -->
         <div id="history-notion-bar" class="hidden bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div class="text-xs text-slate-600 leading-snug">
-            <strong class="text-slate-800">📝 Notionデータベース用 一括コピー</strong><br />
-            <span class="text-[11px] text-slate-500">Notionの表のセルに貼り付けると、端末情報ごと自動で列に分かれます</span>
+            <strong class="text-slate-800">📝 Notion用 一括コピー</strong><br />
+            <span class="text-[11px] text-slate-500">すべての学習記録を、見やすい縦並び形式でまとめてコピーできます</span>
           </div>
           <button id="btn-history-copy-all-tsv" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold shadow-sm transition shrink-0 flex items-center justify-center gap-1.5">
-            <span>📊</span>
-            <span>全記録をNotion表用にコピー</span>
+            <span>📋</span>
+            <span>全記録をNotion用にコピー</span>
           </button>
         </div>
 
@@ -1294,7 +1294,7 @@
       return `${mins}:${rem}`;
     }
 
-    /** Notionページ貼り付け用 Markdown テキスト生成 */
+    /** Notion貼り付け用 テキスト生成（縦並び・箇条書き形式） */
     function buildNotionMarkdown(record) {
       const topic = record.topic;
       const dateStr = formatNotionDateTime(record.lastStudiedAt);
@@ -1302,16 +1302,16 @@
       const timeStr = formatElapsedMinSec(record.lastElapsedSec);
       const acc = record.lastAccuracy ?? 100;
       const phrases = (topic.questions || [])
-        .map((q, i) => `- ${i + 1}. **${q.en}** — ${q.jp}`)
+        .map(q => `・${q.en}`)
         .join("\n");
 
       return [
-        `### 🎯 ${topic.title}（${topic.level || "英会話トレーニング"}）`,
-        `- 学習日時：${dateStr}`,
-        `- 学習端末：${device}`,
-        `- 成績：正答率 ${acc}% ／ タイム ${timeStr}`,
-        ``,
-        `#### 練習したフレーズ`,
+        `学習日時：${dateStr}`,
+        `お題：${topic.title}`,
+        `端末：${device}`,
+        `正答率：${acc}%`,
+        `タイム：${timeStr}`,
+        `学習フレーズ`,
         phrases
       ].join("\n");
     }
@@ -3060,10 +3060,9 @@ JSON形式（このキーのみ、マークダウン不要）:
 
     el.btnHistoryCopyAllTsv.addEventListener("click", () => {
       if (state.history.length === 0) return;
-      const header = ["学習日時", "お題", "端末", "正答率", "タイム", "学習フレーズ"].join("\t");
-      const rows = state.history.map(item => buildNotionTsvRow(item));
-      const ok = copyTextToClipboard([header, ...rows].join("\n"));
-      showToast(ok ? `📊 全${state.history.length}件をNotion表用にコピーしたよ！` : "コピーに失敗しました", ok ? "success" : "error");
+      const blocks = state.history.map(item => buildNotionMarkdown(item));
+      const ok = copyTextToClipboard(blocks.join("\n\n---\n\n"));
+      showToast(ok ? `📋 全${state.history.length}件をNotion用にコピーしたよ！` : "コピーに失敗しました", ok ? "success" : "error");
     });
 
     el.toggleIllustHome.addEventListener("change", (e) => setIllustrationEnabled(e.target.checked));
