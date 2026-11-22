@@ -750,74 +750,84 @@
     const API_KEY_STORAGE_KEY = "eigo_nou_dojo_user_api_key";
     const PREFS_STORAGE_KEY = "eigo_nou_dojo_user_prefs";
     const HISTORY_STORAGE_KEY = "eigo_nou_dojo_v7_history";
+    // 最新モデル優先リスト（404時は自動で次の利用可能なモデルへフォールバック）
+    const GEMINI_TEXT_MODELS = [
+      "gemini-3.5-flash-lite",
+      "gemini-2.5-flash-lite",
+      "gemini-3.8-flash"
+    ];
+    const GEMINI_IMAGE_MODELS = [
+      "gemini-3-pro-image",
+      "gemini-2.5-flash-image"
+    ];
 
     const PRESET_TOPICS = [
       {
         id: "want-to",
         title: "want to ～",
         level: "基本パターン",
-        subtitle: "「～したい」を反射的に口から出す",
-        description: "日常会話で最も使う欲求表現。ネイティブは会話で「wanna（ワナ）」とつなげて発音することも多いよ！",
+        subtitle: "「〜したい」を瞬時に口から出す",
+        description: "日常会話で最も頻出する願望表現。口語では wanna と発音されることも多いよ！",
         questions: [
           {
-            jp: "私はコーヒーが飲みたいです。",
+            jp: "コーヒーが飲みたいです。",
             en: "I want to drink coffee.",
-            accepts: ["I want to drink some coffee", "I wanna drink coffee", "I want to have coffee", "I want to have a cup of coffee"],
-            cue: "キラキラした目で湯気の立つコーヒーカップを思い浮かべている",
+            accepts: ["I wanna drink coffee.", "I want to have coffee.", "I want to have a cup of coffee.", "I'd like to drink coffee."],
+            cue: "温かいコーヒーカップを思い浮かべてワクワクしている様子",
             emoji: "☕✨",
-            promptEn: "What would you like to drink right now?",
-            promptJp: "今、何か飲みたいものはありますか？",
-            altExpr: "I'd like some coffee. / I could really use a coffee.",
-            advice: "want to は日常会話で「wanna（ワナ）」と短く言っても自然！have coffee もよく使うよ。",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A cheerful young Japanese person with sparkling eyes clasping hands together in excitement, with a white thought bubble above their head showing a steaming ceramic mug of hot coffee."
+            promptEn: "What would you like to drink?",
+            promptJp: "何をお飲みになりますか？",
+            altExpr: "I'd like some coffee. / I feel like having coffee.",
+            advice: "want to は口語では wanna（ワナ）とつなげて言うとネイティブっぽくなるよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A cheerful person with sparkling eyes smiling and thinking of a steaming cup of coffee inside a thought bubble."
           },
           {
-            jp: "私は新しい靴を買いたいです。",
-            en: "I want to buy new shoes.",
-            accepts: ["I wanna buy new shoes", "I want to buy a new pair of shoes", "I wanna buy a new pair of shoes"],
-            cue: "ショーウィンドウのピカピカのスニーカーを見て目を輝かせている",
-            emoji: "👟🛍️",
-            promptEn: "What are you planning to buy this weekend?",
-            promptJp: "今週末、何か買う予定のものはありますか？",
-            altExpr: "I'm looking for a new pair of shoes. / I need new shoes.",
-            advice: "靴は左右セットなので複数形の shoes にするのがポイント！a new pair of shoes ならさらに丁寧だよ。",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling young person looking eagerly at a bright shop display window featuring a shiny brand new pair of sneakers, with a thought bubble showing the new shoes and a shopping bag."
+            jp: "今日は早く寝たいです。",
+            en: "I want to go to bed early today.",
+            accepts: ["I want to sleep early today.", "I wanna go to bed early today.", "I want to go to bed early tonight."],
+            cue: "あくびをしながらふかふかのベッドを思い浮かべている様子",
+            emoji: "🛌🌙",
+            promptEn: "What are your plans for tonight?",
+            promptJp: "今夜の予定は？",
+            altExpr: "I'm going to hit the sack early tonight. / I need an early night.",
+            advice: "「寝る」は sleep より go to bed を使うと「布団に入る」ニュアンスが自然に出るよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A sleepy person yawning gently while imagining a cozy bed with a crescent moon inside a thought bubble."
           },
           {
-            jp: "私は今夜映画を見たいです。",
-            en: "I want to watch a movie tonight.",
-            accepts: ["I wanna watch a movie tonight", "I want to see a movie tonight", "I wanna see a movie tonight"],
-            cue: "夜空の窓辺でポップコーンと映画スクリーンをワクワク想像している",
-            emoji: "🎬🍿",
-            promptEn: "How do you want to spend tonight?",
-            promptJp: "今夜はどんなふうに過ごしたいですか？",
-            altExpr: "I feel like watching a movie tonight. / Let's watch a movie tonight.",
-            advice: "家で見るなら watch a movie、映画館なら see a movie が自然。tonight は文末にポンと置こう！",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A relaxed person sitting on a cozy sofa at night with a crescent moon visible through the window, smiling happily with a thought bubble showing a movie screen and a bucket of popcorn."
-          },
-          {
-            jp: "私はもっと英語を上手に話したいです。",
-            en: "I want to speak English better.",
-            accepts: ["I wanna speak English better", "I want to speak English more fluently", "I want to speak better English"],
-            cue: "外国人の友達と楽しそうにペラペラ会話している姿を夢見ている",
+            jp: "英語を上手に話せるようになりたいです。",
+            en: "I want to speak English well.",
+            accepts: ["I wanna speak English well.", "I want to be able to speak English well.", "I want to speak English fluently."],
+            cue: "笑顔で外国人の友達と楽しそうに英会話しているイメージ",
             emoji: "🗣️🌍",
-            promptEn: "What is your main goal this year?",
-            promptJp: "今年のいちばんの目標は何ですか？",
-            altExpr: "I want to improve my English. / I'd love to become fluent in English.",
-            advice: "「もっと上手に」は well の比較級 better を文末に置くだけでOK！シンプルでネイティブも大好き。",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. An enthusiastic Japanese learner looking hopeful with a thought bubble showing themselves chatting happily and confidently with friendly international friends around a globe."
+            promptEn: "What is your goal this year?",
+            promptJp: "今年の目標は何ですか？",
+            altExpr: "I want to become fluent in English. / I'm trying to improve my English.",
+            advice: "「上手に」は文末に well を置くだけでシンプルに通じるよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A motivated person smiling and imagining chatting happily with international friends in a thought bubble."
           },
           {
-            jp: "私は来年日本を旅行したいです。",
-            en: "I want to travel around Japan next year.",
-            accepts: ["I want to travel to Japan next year", "I want to travel in Japan next year", "I wanna travel around Japan next year", "I want to visit Japan next year"],
-            cue: "スーツケースを持って富士山や桜の名所を巡る旅を想像している",
-            emoji: "✈️🗾",
-            promptEn: "Where would you like to travel next year?",
-            promptJp: "来年はどこへ旅行してみたいですか？",
-            altExpr: "I'm hoping to take a trip around Japan next year.",
-            advice: "国の中をあちこち巡るなら travel around Japan、外から行くなら travel to Japan がぴったりだよ。",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A cheerful traveler holding a rolling suitcase with sparkling eyes, and a big thought bubble showing Mount Fuji, cherry blossoms, a red torii gate, and a bullet train."
+            jp: "週末に映画を見たいです。",
+            en: "I want to watch a movie this weekend.",
+            accepts: ["I want to see a movie this weekend.", "I want to watch a movie on the weekend.", "I wanna watch a movie this weekend."],
+            cue: "ポップコーンを持って映画館のスクリーンを想像している様子",
+            emoji: "🎬🍿",
+            promptEn: "What do you want to do this weekend?",
+            promptJp: "今週末は何をしたいですか？",
+            altExpr: "I'm thinking of catching a movie this weekend.",
+            advice: "映画館に行くなら see a movie、家で見るなら watch a movie もよく使うよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling person imagining popcorn and a cozy cinema screen inside a thought bubble."
+          },
+          {
+            jp: "新しい靴を買いたいです。",
+            en: "I want to buy new shoes.",
+            accepts: ["I wanna buy new shoes.", "I want to buy a new pair of shoes.", "I want to get new shoes."],
+            cue: "お店のショーウィンドウにある素敵なスニーカーを見つめている様子",
+            emoji: "👟🛍️",
+            promptEn: "Are you looking for anything special today?",
+            promptJp: "今日は何か特別なものをお探しですか？",
+            altExpr: "I'm looking for a new pair of shoes. / I need new sneakers.",
+            advice: "靴は左右2つで1セットなので、shoes と複数形にするのがポイント！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A happy shopper with sparkling eyes imagining stylish new sneakers inside a thought bubble."
           }
         ]
       },
@@ -825,206 +835,206 @@
         id: "could-you",
         title: "Could you ～?",
         level: "丁寧な依頼",
-        subtitle: "「～していただけますか？」をスマートにお願いする",
-        description: "Can you ～? よりも一歩丁寧で、初対面・お店・ビジネスでも安心して使える万能フレーズだよ。",
+        subtitle: "「〜していただけますか？」をスマートに",
+        description: "お店・職場・旅行先でいつでも使える万能の丁寧なお願いフレーズだよ！",
         questions: [
           {
             jp: "もう一度言っていただけますか？",
             en: "Could you say that again?",
-            accepts: ["Could you repeat that", "Could you say that again please", "Can you say that again"],
-            cue: "耳にそっと手を当てて、笑顔で丁寧にもう一度お願いしている",
-            emoji: "👂🙏",
-            promptEn: "Sorry, was I speaking too fast just now?",
-            promptJp: "すみません、さっき話すのが速すぎましたか？",
-            altExpr: "Sorry, could you repeat that? / Pardon me?",
-            advice: "聞き取れなかった時の最強フレーズ！語尾に please を付けるとさらに優しい印象になるよ。",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A polite smiling person gently cupping one hand behind their ear and gesturing kindly toward a conversation partner, asking them to repeat something."
+            accepts: ["Could you say that again please?", "Can you say that again?", "Could you repeat that?"],
+            cue: "耳に手を当てて、丁寧に聞き返している様子",
+            emoji: "👂🔁",
+            promptEn: "Sorry, was I speaking too fast?",
+            promptJp: "すみません、早口すぎましたか？",
+            altExpr: "Sorry, I didn't catch that. / Could you repeat that, please?",
+            advice: "聞き取れなかった時の最強フレーズ！語尾に please を足すとさらに丁寧だよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A polite person leaning slightly forward with a hand cupped near their ear, smiling kindly as they ask someone to repeat."
           },
           {
-            jp: "窓を開けていただけますか？",
-            en: "Could you open the window?",
-            accepts: ["Could you open the window please", "Can you open the window", "Would you open the window"],
-            cue: "少し暑そうな部屋で、閉まった窓を指さして丁寧にお願いしている",
-            emoji: "🪟🌬️",
-            promptEn: "It feels a bit warm in here. Need anything?",
-            promptJp: "ここ少し暑いですね。何かしましょうか？",
-            altExpr: "Would you mind opening the window? / Can we get some fresh air?",
-            advice: "目の前にある特定の窓なので a ではなく the window にするのが自然だよ。",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A polite person in a warm room gently pointing with an open palm toward a closed glass window with a friendly requesting expression, while a friend stands near the window."
+            jp: "少しゆっくり話していただけますか？",
+            en: "Could you speak more slowly?",
+            accepts: ["Could you speak a little slower?", "Could you speak slowly?", "Can you speak more slowly?"],
+            cue: "両手を落ち着かせるように動かして、ゆっくりお願いしている様子",
+            emoji: "🐢🗣️",
+            promptEn: "Do you understand everything so far?",
+            promptJp: "ここまでの内容は理解できましたか？",
+            altExpr: "Could you slow down a bit? / Would you mind speaking a little slower?",
+            advice: "more slowly でも a little slower でもネイティブに自然に通じるよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A polite listener making a gentle calming hand gesture to ask a speaker to slow down."
           },
           {
             jp: "写真を撮っていただけますか？",
             en: "Could you take a picture?",
-            accepts: ["Could you take a photo", "Could you take a picture of us", "Could you take a photo for me", "Can you take a picture"],
-            cue: "観光地でスマホを差し出しながら、通行人に笑顔でお願いしている",
+            accepts: ["Could you take a photo?", "Could you take a picture of us?", "Could you take a photo for me?", "Can you take a picture?"],
+            cue: "スマホやカメラを差し出して撮影をお願いしている様子",
             emoji: "📸😊",
-            promptEn: "Excuse me, do you need any help?",
-            promptJp: "すみません、何かお手伝いしましょうか？",
-            altExpr: "Could you take a photo of us? / Would you mind taking a quick picture?",
-            advice: "「私たちの写真を撮って」なら take a picture of us / for me を足すと完璧！",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling tourist holding out a smartphone camera politely toward a friendly passerby in front of a scenic park, asking for a photo."
+            promptEn: "Do you need any help here?",
+            promptJp: "何かお手伝いしましょうか？",
+            altExpr: "Would you mind taking a quick photo of us?",
+            advice: "「私たちの」と付けたい時は後ろに of us を足すだけでOK！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling traveler politely holding out a smartphone camera to a friendly passerby at a scenic park."
           },
           {
-            jp: "もう少しゆっくり話していただけますか？",
-            en: "Could you speak more slowly?",
-            accepts: ["Could you speak a little more slowly", "Could you speak slowly", "Can you speak more slowly"],
-            cue: "両手のひらをゆっくり下に動かして、落ち着いて話してほしいとジェスチャーしている",
-            emoji: "🐢💬",
-            promptEn: "Did you catch everything I just explained?",
-            promptJp: "今説明したこと、全部聞き取れましたか？",
-            altExpr: "Could you slow down a bit? / A little slower, please.",
-            advice: "speak more slowly の前に a little を入れて a little more slowly にするとネイティブ度が一気に上がるよ！",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A polite smiling person gently moving both palms downward in a calm slow-down gesture while talking to a friendly speaker, with a small cute turtle icon in a thought bubble."
+            jp: "窓を開けていただけますか？",
+            en: "Could you open the window?",
+            accepts: ["Can you open the window?", "Could you open the window please?", "Would you open the window?"],
+            cue: "少し暑そうな部屋で、窓の方を指しながら丁寧にお願いしている様子",
+            emoji: "🪟🌬️",
+            promptEn: "It feels a bit warm in here, doesn't it?",
+            promptJp: "ここ、ちょっと暑く感じますよね？",
+            altExpr: "Would you mind opening the window? / Mind if we open the window?",
+            advice: "目の前の特定の窓なので、a ではなく the window にするのが自然だよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person in a warm sunlit room politely gesturing toward a closed window asking someone nearby to open it."
           },
           {
-            jp: "この荷物を運ぶのを手伝っていただけますか？",
-            en: "Could you help me carry this bag?",
-            accepts: ["Could you help me with this bag", "Could you help me carry these bags", "Could you help me carry this luggage"],
-            cue: "重そうな大きなバッグの前で、困り笑顔で助けをお願いしている",
-            emoji: "🧳🤝",
-            promptEn: "That looks really heavy! What can I do?",
-            promptJp: "すごく重そうですね！何か手伝いましょうか？",
-            altExpr: "Could you give me a hand with this bag? / Can you help me with my luggage?",
-            advice: "help + 人 + 動詞の原形（help me carry ～）は超頻出の形！to は省略するのが会話の基本だよ。",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person standing next to a large heavy suitcase and shopping bag, smiling politely and gesturing with open hands to ask a friendly nearby person for help lifting it."
+            jp: "これを手伝っていただけますか？",
+            en: "Could you help me with this?",
+            accepts: ["Can you help me with this?", "Could you help me?", "Could you give me a hand with this?"],
+            cue: "少し大きめの荷物や書類を持って助けを求めている様子",
+            emoji: "🤝📦",
+            promptEn: "You look busy. Is everything okay?",
+            promptJp: "忙しそうですね。大丈夫ですか？",
+            altExpr: "Could you give me a hand? / Do you have a second to help me?",
+            advice: "help me with ～ で「〜を手伝う」の定番セットになるよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A friendly person carrying a stack of boxes politely asking a coworker for assistance with a gentle smile."
           }
         ]
       },
       {
         id: "thinking-about",
         title: "I'm thinking about ～ing",
-        level: "予定・検討中",
-        subtitle: "「～しようか考え中なんだ」を柔らかく伝える",
-        description: "まだ100%決まっていないアイデアや計画を話すときに大活躍！about の後ろは必ず動詞の ing 形だよ。",
+        level: "予定・検討",
+        subtitle: "「〜しようか考え中」を自然に伝える",
+        description: "まだ確定していない計画やアイデアを話すときにネイティブが本当によく使う表現だよ！",
         questions: [
           {
-            jp: "新しいノートパソコンを買おうか考えています。",
-            en: "I'm thinking about buying a new laptop.",
-            accepts: ["I am thinking about buying a new laptop", "I'm thinking of buying a new laptop", "I'm thinking about getting a new laptop"],
-            cue: "顎に手を当てて、スリムなノートパソコンを思い浮かべている",
-            emoji: "💻🤔",
-            promptEn: "Your computer looks slow. What are you going to do?",
-            promptJp: "パソコン遅そうだね。どうするつもり？",
-            altExpr: "I might get a new laptop soon. / I'm considering buying a new laptop.",
-            advice: "about の後ろは名詞か動名詞（〜ing）！buy の代わりに get を使ってもすごく自然だよ。",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A thoughtful person resting their chin on their hand looking upward, with a thought bubble above their head showing a sleek modern laptop computer."
+            jp: "転職しようか考えています。",
+            en: "I'm thinking about changing jobs.",
+            accepts: ["I am thinking about changing jobs.", "I'm thinking of changing jobs.", "I'm thinking about changing my job."],
+            cue: "顎に手を当てて、新しい職場を想像している様子",
+            emoji: "💼💭",
+            promptEn: "How is work going lately?",
+            promptJp: "最近、お仕事はどうですか？",
+            altExpr: "I'm considering a career change. / I might look for a new job.",
+            advice: "about の後ろは動詞に -ing をつけるのがルールだよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A thoughtful person resting their chin on their hand, imagining a new office and briefcase inside a thought bubble."
           },
           {
-            jp: "来月引っ越そうか考えています。",
-            en: "I'm thinking about moving next month.",
-            accepts: ["I am thinking about moving next month", "I'm thinking of moving next month", "I'm thinking about moving to a new place next month"],
-            cue: "段ボール箱と新しいアパートの鍵を思い浮かべて検討している",
-            emoji: "📦🏠",
-            promptEn: "Do you have any big plans for next month?",
-            promptJp: "来月、何か大きな予定はある？",
-            altExpr: "I'm considering moving to a new apartment next month.",
-            advice: "「引っ越す」は move 1語でバッチリ通じるよ！move to Tokyo のように場所を足してもOK。",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person tapping their chin thoughtfully with a thought bubble showing cardboard moving boxes, a cozy new apartment building, and a house key."
+            jp: "新しいスマホを買おうか考えています。",
+            en: "I'm thinking about buying a new phone.",
+            accepts: ["I am thinking about buying a new phone.", "I'm thinking of buying a new phone.", "I'm thinking about getting a new smartphone."],
+            cue: "古いスマホを見ながらピカピカの最新スマホを想像している様子",
+            emoji: "📱✨",
+            promptEn: "Is your phone battery dying fast?",
+            promptJp: "スマホの電池の減り、早くなってきました？",
+            altExpr: "I'm thinking of upgrading my phone. / I might get a new phone soon.",
+            advice: "smartphone より phone だけで「スマホ」の意味でバッチリ通じるよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person holding an old phone and imagining a sleek shiny new smartphone in a thought bubble."
+          },
+          {
+            jp: "来月京都に行こうか考えています。",
+            en: "I'm thinking about going to Kyoto next month.",
+            accepts: ["I am thinking about going to Kyoto next month.", "I'm thinking of going to Kyoto next month.", "I'm thinking about visiting Kyoto next month."],
+            cue: "五重塔や紅葉の景色を思い浮かべてワクワクしている様子",
+            emoji: "⛩️🍁",
+            promptEn: "Do you have any travel plans coming up?",
+            promptJp: "近々、旅行の予定はありますか？",
+            altExpr: "I might take a trip to Kyoto next month.",
+            advice: "going to の代わりに visiting を使ってもすごく自然だよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling person imagining a traditional Japanese temple and autumn leaves in a thought bubble."
           },
           {
             jp: "ジムに通い始めようか考えています。",
             en: "I'm thinking about joining a gym.",
-            accepts: ["I am thinking about joining a gym", "I'm thinking about going to the gym", "I'm thinking of joining a gym"],
-            cue: "ダンベルやランニングマシンで運動する自分を想像している",
-            emoji: "🏋️‍♂️🤔",
-            promptEn: "How do you plan to stay in shape?",
-            promptJp: "どうやって体型や健康を維持するつもり？",
-            altExpr: "I'm thinking about starting to work out at a gym.",
-            advice: "「ジムに入会する・通い始める」は join a gym がネイティブの定番表現だよ！",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person standing thoughtfully with a finger on their chin, with a thought bubble showing a bright fitness gym with dumbbells and a treadmill."
+            accepts: ["I am thinking about joining a gym.", "I'm thinking about going to the gym.", "I'm thinking of joining a gym."],
+            cue: "ダンベルやランニングマシンで運動する自分を想像している様子",
+            emoji: "🏋️‍♂️💪",
+            promptEn: "Have you been working out lately?",
+            promptJp: "最近、運動はしていますか？",
+            altExpr: "I'm thinking of starting to work out. / I might sign up for a gym.",
+            advice: "「ジムに入会する・通い始める」は joining a gym が定番表現！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person resting their chin on their hand, imagining dumbbells and a bright fitness gym in a thought bubble."
           },
           {
-            jp: "今週末は家でゆっくりしようか考えています。",
-            en: "I'm thinking about relaxing at home this weekend.",
-            accepts: ["I am thinking about relaxing at home this weekend", "I'm thinking about staying home this weekend", "I'm thinking of relaxing at home this weekend"],
-            cue: "ソファで毛布にくるまってくつろぐ週末を想像している",
-            emoji: "🛋️😌",
-            promptEn: "What are you up to this weekend?",
-            promptJp: "今週末は何をする予定？",
-            altExpr: "I might just chill at home this weekend. / I'll probably take it easy at home.",
-            advice: "relax at home のほかに、カジュアルなら chill at home もネイティブがよく使うよ！",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person smiling gently with a hand on their chin, imagining themselves in a thought bubble lounging comfortably on a soft sofa with a warm blanket and tea."
-          },
-          {
-            jp: "転職しようか考えています。",
-            en: "I'm thinking about changing jobs.",
-            accepts: ["I am thinking about changing jobs", "I'm thinking about changing my job", "I'm thinking of changing jobs"],
-            cue: "今のデスクと新しいオフィスへの道を見比べてじっくり考えている",
-            emoji: "💼🔄",
-            promptEn: "How's work going these days?",
-            promptJp: "最近、仕事の調子はどう？",
-            altExpr: "I'm considering looking for a new job. / I might switch careers.",
-            advice: "「転職する」は change jobs と複数形にするのが自然な英語表現だよ（今の仕事と次の仕事の2つがあるイメージ）。",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. An office worker in smart casual clothes holding their chin thoughtfully, with a thought bubble showing a briefcase and a bright path leading toward a fresh new office building."
+            jp: "今夜はパスタを作ろうか考えています。",
+            en: "I'm thinking about making pasta tonight.",
+            accepts: ["I am thinking about making pasta tonight.", "I'm thinking about cooking pasta tonight.", "I'm thinking of making pasta tonight."],
+            cue: "美味しそうなトマトパスタを想像してお腹を空かせている様子",
+            emoji: "🍝🍅",
+            promptEn: "What are you having for dinner tonight?",
+            promptJp: "今夜の晩ごはんは何にするんですか？",
+            altExpr: "I might cook some pasta for dinner. / I feel like making pasta.",
+            advice: "料理を作る時は cook でも make でもOK！普段は make が軽くてよく使われるよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A hungry smiling person imagining a steaming plate of tomato pasta inside a thought bubble."
           }
         ]
       },
       {
         id: "it-takes",
         title: "It takes ～ to ...",
-        level: "所要時間・労力",
-        subtitle: "「…するのに～かかる」をスムーズに説明する",
-        description: "通勤時間や移動時間、作業時間を伝える鉄板構文。主語を It にして、後ろに時間→ to 動詞 を並べるだけ！",
+        level: "時間・労力",
+        subtitle: "「〜するのに（時間）がかかる」をサッと言う",
+        description: "移動時間や作業時間を伝えるときの鉄板パターン。主語は迷わず It から始めよう！",
         questions: [
           {
-            jp: "駅まで歩くのに10分かかります。",
+            jp: "駅まで歩いて10分かかります。",
             en: "It takes ten minutes to walk to the station.",
-            accepts: ["It takes 10 minutes to walk to the station", "It takes ten minutes to get to the station on foot"],
-            cue: "時計の10分ゾーンと、駅へ向かって歩く人のシルエット",
-            emoji: "⏱️🚶‍♂️🚉",
-            promptEn: "How long does it take to walk to the station from here?",
-            promptJp: "ここから駅まで歩いてどれくらいかかりますか？",
+            accepts: ["It takes 10 minutes to walk to the station.", "It takes ten minutes on foot to the station."],
+            cue: "10分経過を示す時計と、駅に向かって歩く人の様子",
+            emoji: "🚶‍♂️⏱️",
+            promptEn: "How far is the station from your house?",
+            promptJp: "あなたの家から駅までどれくらいですか？",
             altExpr: "It's a ten-minute walk to the station.",
-            advice: "「It takes + 時間 + to + 動詞」の語順をリズムで覚えよう！数字は 10 でも ten でもOK。",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person walking briskly along a sidewalk toward a train station building, with a large stylized clock face in the sky showing a 10-minute highlighted wedge."
+            advice: "It takes + 時間 + to 動詞 の語順をリズムで丸ごと覚えちゃおう！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person walking briskly toward a train station next to an analog clock showing a shaded 10-minute wedge."
           },
           {
-            jp: "空港まで電車で1時間かかります。",
-            en: "It takes an hour to get to the airport by train.",
-            accepts: ["It takes one hour to get to the airport by train", "It takes an hour by train to get to the airport", "It takes one hour to go to the airport by train"],
-            cue: "時計の1周と、空港へ向かう電車と飛行機のイメージ",
-            emoji: "🕒🚃✈️",
-            promptEn: "How long does it take to get to the airport?",
-            promptJp: "空港までどれくらい時間がかかりますか？",
-            altExpr: "It's about an hour by train to the airport.",
-            advice: "「到着する」は go よりも get to ～ が自然！an hour は「アナウアー」とつなげて発音しよう。",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A sleek commuter train speeding toward an airport terminal with an airplane taking off, accompanied by a clean circular clock graphic highlighting a full one-hour sweep."
+            jp: "車で会社まで30分かかります。",
+            en: "It takes thirty minutes to drive to work.",
+            accepts: ["It takes 30 minutes to drive to work.", "It takes thirty minutes to get to work by car.", "It takes half an hour to drive to work."],
+            cue: "30分経過を示す時計と、オフィスへ向かって車を運転する様子",
+            emoji: "🚗🏢",
+            promptEn: "How long is your commute?",
+            promptJp: "通勤にはどれくらいかかりますか？",
+            altExpr: "It's about a 30-minute drive to the office.",
+            advice: "「会社へ」は to the company より to work の方がずっと自然だよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A commuter driving a car toward city office buildings beside an analog clock with a shaded 30-minute half circle."
           },
           {
-            jp: "夕食を作るのに30分かかります。",
-            en: "It takes thirty minutes to cook dinner.",
-            accepts: ["It takes 30 minutes to cook dinner", "It takes thirty minutes to make dinner", "It takes 30 minutes to make dinner", "It takes half an hour to make dinner"],
-            cue: "時計の半分（30分）と、フライパンで楽しく夕食を作る姿",
-            emoji: "⏲️🍳🍽️",
-            promptEn: "How long will dinner take?",
-            promptJp: "夕飯ができるまでどれくらいかかりそう？",
-            altExpr: "Dinner will be ready in about half an hour.",
-            advice: "30分は thirty minutes でも half an hour でもOK！cook dinner も make dinner も両方使えるよ。",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling home cook stirring a pan of delicious dinner in a warm kitchen, with a clean clock face graphic beside them highlighting a 30-minute half circle."
+            jp: "夕食を作るのに1時間かかります。",
+            en: "It takes an hour to make dinner.",
+            accepts: ["It takes one hour to make dinner.", "It takes an hour to cook dinner.", "It takes 1 hour to cook dinner."],
+            cue: "時計の1周と、キッチンで楽しく夕食を料理する様子",
+            emoji: "🍳⏰",
+            promptEn: "How long does it take to prepare dinner?",
+            promptJp: "夕食の準備にはどれくらいかかりますか？",
+            altExpr: "Dinner usually takes me about an hour to make.",
+            advice: "hour の h は発音しないので、a ではなく an hour になるよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A cheerful cook stirring a pot in a cozy kitchen next to an analog clock showing a full shaded circle."
           },
           {
-            jp: "新しい言語を学ぶには時間がかかります。",
-            en: "It takes time to learn a new language.",
-            accepts: ["It takes a long time to learn a new language", "Learning a new language takes time"],
-            cue: "砂時計と、少しずつ成長していく芽と本・地球のイメージ",
-            emoji: "⏳📚🌱",
-            promptEn: "Why isn't my English improving overnight?",
-            promptJp: "どうして一晩で英語がペラペラにならないんだろう？",
-            altExpr: "Learning a language doesn't happen overnight. / It requires patience.",
-            advice: "It takes time to ～ は「～には時間がかかるものだよ」という励ましでも超よく使う名フレーズ！",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A calm symbolic scene showing an hourglass, open study notebooks, a small sprouting green plant growing taller, and a globe."
+            jp: "この本を読み終えるのに2日かかります。",
+            en: "It takes two days to finish this book.",
+            accepts: ["It takes 2 days to finish this book.", "It takes two days to read this book."],
+            cue: "カレンダーの2日間と、分厚い本を読んでいる様子",
+            emoji: "📖📅",
+            promptEn: "How long will it take you to read that book?",
+            promptJp: "その本を読むのにどれくらいかかりそうですか？",
+            altExpr: "I'll probably need two days to finish this book.",
+            advice: "「読み終える」は finish this book だけでスッキリ伝わるよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A reader enjoying a thick book on a sofa beside a simple calendar icon highlighting two days."
           },
           {
-            jp: "この仕事を終わらせるのに2日かかります。",
-            en: "It takes two days to finish this work.",
-            accepts: ["It takes 2 days to finish this work", "It takes two days to finish this job", "It takes two days to complete this task", "It will take two days to finish this work"],
-            cue: "カレンダーの2日分のマークと、デスクで資料を仕上げる姿",
-            emoji: "📅💼✅",
-            promptEn: "How long do you need to finish this work?",
-            promptJp: "この仕事を終わらせるのにどれくらい必要ですか？",
-            altExpr: "I'll need two days to wrap this up.",
-            advice: "「終わらせる」は finish this work / task。未来の予定として言うなら It'll take two days ～ もバッチリ！",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A focused worker at a neat desk with documents and a laptop, with a visual wall calendar icon beside them showing two consecutive days highlighted with checkmarks."
+            jp: "英語を身につけるには時間がかかります。",
+            en: "It takes time to learn English.",
+            accepts: ["It takes time to master English.", "It takes a long time to learn English."],
+            cue: "砂時計と、毎日コツコツ英語を勉強している様子",
+            emoji: "⏳📚",
+            promptEn: "Do you think learning a language is easy?",
+            promptJp: "語学を学ぶのは簡単だと思いますか？",
+            altExpr: "Learning English doesn't happen overnight. / It takes patience.",
+            advice: "It takes time.（時間がかかるものだよ）はそのまま単独でもよく使う名フレーズ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A calm learner studying with books and headphones next to a glowing hourglass symbolizing steady progress."
           }
         ]
       },
@@ -1032,68 +1042,68 @@
         id: "used-to",
         title: "I used to ～",
         level: "過去の習慣",
-        subtitle: "「昔はよく～したものだ（今はしていない）」を語る",
-        description: "昔の話や思い出トークで会話が弾む鉄板表現！発音は「ユース・トゥ」のように濁らず軽くつなげるのがコツだよ。",
+        subtitle: "「以前は〜していた（今はしていない）」を語る",
+        description: "昔話をするときに大活躍！今はもうやっていない過去の習慣や状態を表現できるよ。",
         questions: [
           {
-            jp: "私は昔よくサッカーをしていました。",
+            jp: "以前はよくサッカーをしていました。",
             en: "I used to play soccer.",
-            accepts: ["I used to play football", "I used to play soccer a lot"],
-            cue: "セピア調の思い出雲の中で、サッカーボールを元気に蹴る昔の姿",
-            emoji: "⚽💭",
-            promptEn: "Did you play any sports when you were a kid?",
-            promptJp: "子どもの頃、何かスポーツをしていましたか？",
-            altExpr: "I played soccer when I was younger.",
-            advice: "used to を使うだけで「昔はやっていたけど、今はもうやっていない」というニュアンスが一発で伝わるよ！",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling adult looking nostalgic with a warm sepia-toned memory cloud above them showing their younger self happily kicking a soccer ball on a field."
+            accepts: ["I used to play soccer a lot.", "I used to play football."],
+            cue: "セピア色の思い出の雲の中で、サッカーボールを蹴っている様子",
+            emoji: "⚽🎞️",
+            promptEn: "Did you play any sports when you were younger?",
+            promptJp: "若い頃、何かスポーツをしていましたか？",
+            altExpr: "I played soccer a lot back in the day.",
+            advice: "used to は「ユーストゥ」と軽くつなげて発音するとスムーズだよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling adult reminiscing with a warm sepia-toned memory cloud showing their younger self kicking a soccer ball."
           },
           {
-            jp: "私は昔大阪に住んでいました。",
+            jp: "以前は大阪に住んでいました。",
             en: "I used to live in Osaka.",
-            accepts: ["I used to live in Osaka city"],
-            cue: "懐かしい思い出雲の中に、賑やかな大阪の街並みとお城が見える",
+            accepts: ["I used to live in Osaka before."],
+            cue: "セピア色の思い出の雲の中に、大阪の賑やかな街並みがある様子",
             emoji: "🏯💭",
             promptEn: "Have you always lived in Tokyo?",
-            promptJp: "ずっと東京に住んでいたんですか？",
+            promptJp: "ずっと東京に住んでいるんですか？",
             altExpr: "I lived in Osaka a few years ago.",
-            advice: "動作だけでなく「昔住んでいた」という過去の状態にも used to live in ～ が使えるよ！",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling person reminiscing warmly with a sepia-tinted memory cloud showing a charming Japanese castle and lively riverside cityscape at dusk."
+            advice: "「以前住んでいた（今は別の場所）」というニュアンスが used to 一発で伝わるよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A friendly person smiling nostalgically with a sepia-toned memory cloud showing a vibrant Japanese castle town."
           },
           {
-            jp: "私は昔毎朝走っていました。",
-            en: "I used to run every morning.",
-            accepts: ["I used to jog every morning", "I used to go running every morning", "I used to go for a run every morning"],
-            cue: "朝日の差す公園をさわやかにジョギングしていた昔の記憶",
-            emoji: "🏃‍♂️🌅💭",
-            promptEn: "Do you exercise in the mornings?",
-            promptJp: "朝に運動したりしますか？",
-            altExpr: "I used to go for a morning run, though I stopped recently.",
-            advice: "run でも jog でもOK！「以前は習慣だった」という昔話にぴったりなフレーズだよ。",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A nostalgic person smiling gently with a warm vintage-tinted memory cloud showing themselves jogging happily through a park at sunrise."
+            jp: "以前は毎日コーヒーを飲んでいました。",
+            en: "I used to drink coffee every day.",
+            accepts: ["I used to have coffee every day."],
+            cue: "昔は毎日コーヒーを飲んでいた思い出を懐かしんでいる様子",
+            emoji: "☕🕰️",
+            promptEn: "Do you drink coffee?",
+            promptJp: "コーヒーは飲みますか？",
+            altExpr: "I drank coffee every single day, though I cut back recently.",
+            advice: "「今はあまり飲まない（やめた）」という含みが自然に出るのが used to の魅力！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person holding herbal tea while looking up at a warm sepia memory cloud showing daily cups of coffee."
           },
           {
-            jp: "私は昔コーヒーが嫌いでした。",
-            en: "I used to hate coffee.",
-            accepts: ["I used to dislike coffee", "I didn't use to like coffee", "I didn't used to like coffee"],
-            cue: "今は笑顔でコーヒーを持ちつつ、昔は苦い顔をしていた思い出雲",
-            emoji: "☕😖💭",
-            promptEn: "Wow, you really love coffee, don't you?",
-            promptJp: "わあ、本当にコーヒーが好きなんですね？",
-            altExpr: "Believe it or not, I couldn't stand coffee back then.",
-            advice: "hate は「大嫌い」という意味だけど、食べ物の好みではネイティブもカジュアルによく使うよ！",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person happily enjoying a cup of coffee now, while a sepia-toned memory cloud above shows their younger self making a funny bitter face at a coffee cup."
+            jp: "以前はピアノを弾いていました。",
+            en: "I used to play the piano.",
+            accepts: ["I used to play piano."],
+            cue: "セピア色の思い出の中で、ピアノの鍵盤を弾いている様子",
+            emoji: "🎹🎶",
+            promptEn: "Can you play any musical instruments?",
+            promptJp: "何か楽器は弾けますか？",
+            altExpr: "I took piano lessons when I was a kid.",
+            advice: "楽器には the をつけるのが基本だけど、口語では play piano でも通じるよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling person reminiscing with a sepia-toned memory cloud showing hands playing a classic upright piano."
           },
           {
-            jp: "私は昔よくこのカフェに来ていました。",
-            en: "I used to come to this cafe.",
-            accepts: ["I used to come to this cafe a lot", "I used to visit this cafe", "I used to go to this cafe"],
-            cue: "居心地のいいカフェの前で、懐かしそうに昔の自分を思い出している",
-            emoji: "☕🏡💭",
-            promptEn: "Do you know this cafe well?",
-            promptJp: "このカフェのこと、よく知っているんですか？",
-            altExpr: "I was a regular at this cafe back in the day.",
-            advice: "今そのカフェにいる（または目の前にいる）なら go ではなく come to this cafe が自然だよ！",
-            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling person standing warmly in front of a cozy neighborhood cafe, with a soft sepia memory cloud showing them relaxing by the cafe window in the past."
+            jp: "以前はよく本を読んでいました。",
+            en: "I used to read a lot of books.",
+            accepts: ["I used to read books a lot.", "I used to read many books."],
+            cue: "セピア色の思い出の中で、積み上がった本を夢中で読んでいる様子",
+            emoji: "📚✨",
+            promptEn: "Do you read much in your free time?",
+            promptJp: "空いた時間によく読書をしますか？",
+            altExpr: "I was a big reader back then.",
+            advice: "「たくさんの〜」は肯定文では many より a lot of の方が会話では自然だよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A nostalgic person smiling with a sepia-toned memory cloud showing a cozy chair surrounded by stacks of books."
           }
         ]
       }
@@ -1115,49 +1125,48 @@
       soundEnabled: true,
       illustrationEnabled: true,
       userApiKey: "",
+      activeTextModel: null,
 
       // トレーニング進行状態
       queue: [],
       retryQueue: [],
-      isRetryRound: false,
       clearedIndices: new Set(),
+      isRetryRound: false,
       currentQuestionIdx: 0,
       currentQuestion: null,
 
-      // セッション計測
+      // 音声認識・タイマー状態
+      isListening: false,
+      isEvaluating: false,
+      latestTranscript: "",
+      hasSpokenThisTurn: false,
+      silenceTimeout: null,
+      promptFallbackTimer: null,
+      timerInterval: null,
+      timerTotalMs: 8000,
+      timerRemainingMs: 8000,
+      lastTickSec: 8,
+
+      // セッション成績
       sessionStartTime: 0,
       sessionAttempts: 0,
       sessionCorrects: 0,
 
-      // 音声認識 & タイマー状態
-      isListening: false,
-      hasSpokenThisTurn: false,
-      latestTranscript: "",
-      isEvaluating: false,
-      timerInterval: null,
-      timerRemainingMs: 0,
-      timerTotalMs: 0,
-      lastTickSec: null,
-      silenceTimeout: null,
-      promptFallbackTimer: null,
-
-      // Stage 2 背景イラスト先読み管理
-      bgImages: {}, // { [questionIdx]: { status: 'idle'|'loading'|'done'|'error', url: string|null } }
+      // Stage 2 イラスト先読み状態
+      bgImages: {},
       bgGenRunId: 0,
 
-      // 統計（localStorageに保存）
+      // 統計＆学習履歴
       stats: {
         streak: 0,
         totalClearedSets: 0,
         lastClearedDate: null
       },
-
-      // v7：学習履歴（クリアしたお題データとスコアを保存）
       history: []
     };
 
     // =========================================================================
-    // 3. 永続化ユーティリティ（統計・設定・APIキー・学習履歴）
+    // 3. 日付・統計・設定・履歴の永続化
     // =========================================================================
     function getTodayDateString() {
       const d = new Date();
@@ -1904,7 +1913,59 @@
       return { decided: false };
     }
 
-    /** AI超軽量判定（グレーゾーン別解のみ・思考オフ＆2.5秒タイムアウト） */
+    /** Gemini テキストAPI共通呼び出し（最新モデル優先＋404自動フォールバック） */
+    async function callGeminiTextAPI({ apiKey, prompt, jsonMode = false, maxOutputTokens = null, signal = null }) {
+      const candidates = state.activeTextModel
+        ? [state.activeTextModel, ...GEMINI_TEXT_MODELS.filter(m => m !== state.activeTextModel)]
+        : [...GEMINI_TEXT_MODELS];
+
+      const generationConfig = {};
+      if (jsonMode) generationConfig.responseMimeType = "application/json";
+      if (maxOutputTokens) generationConfig.maxOutputTokens = maxOutputTokens;
+
+      const body = {
+        contents: [{ parts: [{ text: prompt }] }],
+        ...(Object.keys(generationConfig).length > 0 ? { generationConfig } : {})
+      };
+
+      let lastErrMsg = "接続エラー";
+      for (const model of candidates) {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            ...(signal ? { signal } : {}),
+            body: JSON.stringify(body)
+          }
+        );
+
+        if (res.ok) {
+          state.activeTextModel = model;
+          const data = await res.json();
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          return { text, model };
+        }
+
+        let errDetail = `HTTP ${res.status}`;
+        try {
+          const errJson = await res.json();
+          if (errJson?.error?.message) errDetail = `HTTP ${res.status}: ${errJson.error.message}`;
+        } catch (e) {}
+        lastErrMsg = errDetail;
+
+        // 404（モデル非対応・廃止）のときだけ次の候補モデルを試す
+        if (res.status === 404) {
+          if (state.activeTextModel === model) state.activeTextModel = null;
+          continue;
+        }
+        throw new Error(errDetail);
+      }
+
+      throw new Error(lastErrMsg);
+    }
+
+    /** AI超軽量判定（グレーゾーン別解のみ・2.5秒タイムアウト） */
     async function evaluateAnswerWithUltraLightAI(userText, question) {
       const apiKey = getActiveApiKey();
       if (!apiKey) {
@@ -1930,27 +1991,13 @@
 意味が通じて自然な英語（多少の口語・言い換えOK）ならtrue。厳格なスペル・句読点は不問。
 JSONのみで返答: {"ok":true|false,"tip":"日本語で45文字以内の短いアドバイス"}`;
 
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            signal: controller.signal,
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: {
-                responseMimeType: "application/json",
-                temperature: 0.1,
-                maxOutputTokens: 120,
-                thinkingConfig: { thinkingBudget: 0 }
-              }
-            })
-          }
-        );
-
-        if (!res.ok) throw new Error("API status " + res.status);
-        const data = await res.json();
-        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        const { text: rawText } = await callGeminiTextAPI({
+          apiKey,
+          prompt,
+          jsonMode: true,
+          maxOutputTokens: 120,
+          signal: controller.signal
+        });
         const parsed = JSON.parse(rawText);
         return {
           isCorrect: Boolean(parsed.ok),
@@ -2018,24 +2065,11 @@ ${userTheme}
   ]
 }`;
 
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: {
-                responseMimeType: "application/json",
-                temperature: 0.8
-              }
-            })
-          }
-        );
-
-        if (!res.ok) throw new Error("API error " + res.status);
-        const data = await res.json();
-        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        const { text: rawText } = await callGeminiTextAPI({
+          apiKey,
+          prompt,
+          jsonMode: true
+        });
         const parsed = JSON.parse(rawText);
 
         if (!parsed.title || !Array.isArray(parsed.questions) || parsed.questions.length < 3) {
@@ -2066,31 +2100,35 @@ ${userTheme}
       }
     }
 
-    /** 画像生成API呼び出し（Imagen 3） */
+    /** 画像生成API呼び出し（最新Gemini画像モデル＋自動フォールバック） */
     async function generateIllustrationUrl(imagePrompt) {
       const apiKey = getActiveApiKey();
       if (!apiKey) return null;
 
-      try {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${encodeURIComponent(apiKey)}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              instances: [{ prompt: imagePrompt }],
-              parameters: { sampleCount: 1, aspectRatio: "4:3" }
-            })
+      for (const model of GEMINI_IMAGE_MODELS) {
+        try {
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: imagePrompt }] }],
+                generationConfig: { responseModalities: ["IMAGE"] }
+              })
+            }
+          );
+          if (!res.ok) continue;
+          const data = await res.json();
+          const parts = data?.candidates?.[0]?.content?.parts || [];
+          const imgPart = parts.find(p => p.inlineData && p.inlineData.data);
+          if (imgPart) {
+            const mime = imgPart.inlineData.mimeType || "image/png";
+            return `data:${mime};base64,${imgPart.inlineData.data}`;
           }
-        );
-        if (!res.ok) throw new Error("Imagen status " + res.status);
-        const data = await res.json();
-        const b64 = data?.predictions?.[0]?.bytesBase64Encoded;
-        if (!b64) return null;
-        return `data:image/png;base64,${b64}`;
-      } catch (e) {
-        return null;
+        } catch (e) {}
       }
+      return null;
     }
 
     function resetBackgroundImagesForTopic(topic) {
@@ -2992,21 +3030,15 @@ ${userTheme}
       el.btnTestApikey.disabled = true;
       el.btnTestApikeyLabel.textContent = "テスト中...";
       el.apikeyTestResult.classList.add("hidden");
+      state.activeTextModel = null;
 
       try {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: "Reply with OK only." }] }],
-              generationConfig: { maxOutputTokens: 10 }
-            })
-          }
-        );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        el.apikeyTestResult.textContent = "✅ 接続成功！Gemini AIが正常に使える状態です。";
+        const { model } = await callGeminiTextAPI({
+          apiKey: key,
+          prompt: "Reply with OK only.",
+          maxOutputTokens: 10
+        });
+        el.apikeyTestResult.textContent = `✅ 接続成功！（使用モデル: ${model}）Gemini AIが正常に使える状態です。`;
         el.apikeyTestResult.className = "rounded-xl p-2.5 text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200";
       } catch (e) {
         el.apikeyTestResult.textContent = `❌ 接続に失敗しました（${e.message}）。キーが正しいか確認してください。`;
