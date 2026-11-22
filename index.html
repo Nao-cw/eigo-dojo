@@ -94,7 +94,7 @@
         <button id="btn-open-history" class="relative p-2 sm:px-3 sm:py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-emerald-50 hover:border-emerald-200 transition shadow-sm flex items-center gap-1 text-xs font-extrabold" title="学習記録と復習">
           <span>📚</span>
           <span class="hidden sm:inline">記録</span>
-          <span id="history-count-badge" class="hidden px-1.5 py-0.2 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold leading-tight">0</span>
+          <span id="history-count-badge" class="hidden px-1.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold leading-none">0</span>
         </button>
 
         <!-- 効果音ミュートトグル -->
@@ -257,7 +257,7 @@
       </section>
 
       <!-- ======================================== -->
-      <!-- 2. トレーニング画面 (Stage 1 & Stage 2) -->
+      <!-- 2. トレーニング画面 (Stage 1 / 2 / 3) -->
       <!-- ======================================== -->
       <section id="screen-training" class="hidden space-y-4 animate-fade-up">
 
@@ -466,7 +466,7 @@
               </div>
             </div>
 
-            <!-- 違う言い回し・ネイティブ表現（Stage 3や別表現がある場合） -->
+            <!-- 違う言い回し・ネイティブ表現 -->
             <div id="result-alt-box" class="hidden bg-amber-50/80 rounded-2xl p-4 border border-amber-200/80 flex items-start gap-2.5">
               <span class="text-lg shrink-0">💬</span>
               <div class="flex-1 min-w-0">
@@ -666,7 +666,7 @@
           <div class="space-y-2">
             <label for="input-api-key" class="block text-xs font-bold text-slate-700">Google AI Studio APIキー</label>
             <div class="relative flex items-center">
-              <input id="input-api-key" type="password" autocomplete="off" placeholder="AIzaSy..." class="w-full pl-3.5 pr-11 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition" />
+              <input id="input-api-key" type="password" autocomplete="off" placeholder="AQ. または AIzaSy..." class="w-full pl-3.5 pr-11 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition" />
               <button id="btn-toggle-key-vis" type="button" class="absolute right-2.5 p-1.5 text-slate-400 hover:text-slate-700 transition" title="表示/非表示を切り替え">👁️</button>
             </div>
 
@@ -718,7 +718,7 @@
           </button>
           <div id="pwa-guide-content" class="hidden p-4 bg-white text-xs text-slate-600 space-y-3 leading-relaxed border-t border-slate-100">
             <p class="text-slate-700 font-medium">
-              このHTMLを <code class="px-1.5 py-0.5 rounded bg-slate-100 font-mono text-[11px]">index.html</code> にリネームして <strong>Netlify Drop</strong> や <strong>GitHub Pages</strong>（https://〜）に公開したあと、以下の操作でアプリのように全画面で使えます！
+              このHTMLを <code class="px-1.5 py-0.5 rounded bg-slate-100 font-mono text-[11px]">index.html</code> にリネームして <strong>GitHub Pages</strong> や <strong>Netlify Drop</strong>（https://〜）に公開したあと、以下の操作でアプリのように全画面で使えます！
             </p>
             <div class="space-y-2">
               <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
@@ -743,28 +743,512 @@
 
   <script>
     // =========================================================================
-    // 1. プリセットお題データ（全5パターン × 5問 = 25問：情景イメージカード対応）
+    // 1. 定数・プリセットお題データ（全5パターン × 5問 = 25問）
     // =========================================================================
     const defaultEnvApiKey = ""; // プレビュー実行環境により自動補完されます（HTMLに直書きしないでください）
     const STORAGE_KEY = "eigo_nou_dojo_v5_stats";
     const API_KEY_STORAGE_KEY = "eigo_nou_dojo_user_api_key";
     const PREFS_STORAGE_KEY = "eigo_nou_dojo_user_prefs";
     const HISTORY_STORAGE_KEY = "eigo_nou_dojo_v7_history";
-// ... existing code ... -->
+
+    const PRESET_TOPICS = [
+      {
+        id: "want-to",
+        title: "want to ～",
+        level: "基本パターン",
+        subtitle: "「～したい」を反射的に口から出す",
+        description: "日常会話で最も使う欲求表現。ネイティブは会話で「wanna（ワナ）」とつなげて発音することも多いよ！",
+        questions: [
+          {
+            jp: "私はコーヒーが飲みたいです。",
+            en: "I want to drink coffee.",
+            accepts: ["I want to drink some coffee", "I wanna drink coffee", "I want to have coffee", "I want to have a cup of coffee"],
+            cue: "キラキラした目で湯気の立つコーヒーカップを思い浮かべている",
+            emoji: "☕✨",
+            promptEn: "What would you like to drink right now?",
+            promptJp: "今、何か飲みたいものはありますか？",
+            altExpr: "I'd like some coffee. / I could really use a coffee.",
+            advice: "want to は日常会話で「wanna（ワナ）」と短く言っても自然！have coffee もよく使うよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A cheerful young Japanese person with sparkling eyes clasping hands together in excitement, with a white thought bubble above their head showing a steaming ceramic mug of hot coffee."
+          },
+          {
+            jp: "私は新しい靴を買いたいです。",
+            en: "I want to buy new shoes.",
+            accepts: ["I wanna buy new shoes", "I want to buy a new pair of shoes", "I wanna buy a new pair of shoes"],
+            cue: "ショーウィンドウのピカピカのスニーカーを見て目を輝かせている",
+            emoji: "👟🛍️",
+            promptEn: "What are you planning to buy this weekend?",
+            promptJp: "今週末、何か買う予定のものはありますか？",
+            altExpr: "I'm looking for a new pair of shoes. / I need new shoes.",
+            advice: "靴は左右セットなので複数形の shoes にするのがポイント！a new pair of shoes ならさらに丁寧だよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling young person looking eagerly at a bright shop display window featuring a shiny brand new pair of sneakers, with a thought bubble showing the new shoes and a shopping bag."
+          },
+          {
+            jp: "私は今夜映画を見たいです。",
+            en: "I want to watch a movie tonight.",
+            accepts: ["I wanna watch a movie tonight", "I want to see a movie tonight", "I wanna see a movie tonight"],
+            cue: "夜空の窓辺でポップコーンと映画スクリーンをワクワク想像している",
+            emoji: "🎬🍿",
+            promptEn: "How do you want to spend tonight?",
+            promptJp: "今夜はどんなふうに過ごしたいですか？",
+            altExpr: "I feel like watching a movie tonight. / Let's watch a movie tonight.",
+            advice: "家で見るなら watch a movie、映画館なら see a movie が自然。tonight は文末にポンと置こう！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A relaxed person sitting on a cozy sofa at night with a crescent moon visible through the window, smiling happily with a thought bubble showing a movie screen and a bucket of popcorn."
+          },
+          {
+            jp: "私はもっと英語を上手に話したいです。",
+            en: "I want to speak English better.",
+            accepts: ["I wanna speak English better", "I want to speak English more fluently", "I want to speak better English"],
+            cue: "外国人の友達と楽しそうにペラペラ会話している姿を夢見ている",
+            emoji: "🗣️🌍",
+            promptEn: "What is your main goal this year?",
+            promptJp: "今年のいちばんの目標は何ですか？",
+            altExpr: "I want to improve my English. / I'd love to become fluent in English.",
+            advice: "「もっと上手に」は well の比較級 better を文末に置くだけでOK！シンプルでネイティブも大好き。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. An enthusiastic Japanese learner looking hopeful with a thought bubble showing themselves chatting happily and confidently with friendly international friends around a globe."
+          },
+          {
+            jp: "私は来年日本を旅行したいです。",
+            en: "I want to travel around Japan next year.",
+            accepts: ["I want to travel to Japan next year", "I want to travel in Japan next year", "I wanna travel around Japan next year", "I want to visit Japan next year"],
+            cue: "スーツケースを持って富士山や桜の名所を巡る旅を想像している",
+            emoji: "✈️🗾",
+            promptEn: "Where would you like to travel next year?",
+            promptJp: "来年はどこへ旅行してみたいですか？",
+            altExpr: "I'm hoping to take a trip around Japan next year.",
+            advice: "国の中をあちこち巡るなら travel around Japan、外から行くなら travel to Japan がぴったりだよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A cheerful traveler holding a rolling suitcase with sparkling eyes, and a big thought bubble showing Mount Fuji, cherry blossoms, a red torii gate, and a bullet train."
+          }
+        ]
+      },
+      {
+        id: "could-you",
+        title: "Could you ～?",
+        level: "丁寧な依頼",
+        subtitle: "「～していただけますか？」をスマートにお願いする",
+        description: "Can you ～? よりも一歩丁寧で、初対面・お店・ビジネスでも安心して使える万能フレーズだよ。",
+        questions: [
+          {
+            jp: "もう一度言っていただけますか？",
+            en: "Could you say that again?",
+            accepts: ["Could you repeat that", "Could you say that again please", "Can you say that again"],
+            cue: "耳にそっと手を当てて、笑顔で丁寧にもう一度お願いしている",
+            emoji: "👂🙏",
+            promptEn: "Sorry, was I speaking too fast just now?",
+            promptJp: "すみません、さっき話すのが速すぎましたか？",
+            altExpr: "Sorry, could you repeat that? / Pardon me?",
+            advice: "聞き取れなかった時の最強フレーズ！語尾に please を付けるとさらに優しい印象になるよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A polite smiling person gently cupping one hand behind their ear and gesturing kindly toward a conversation partner, asking them to repeat something."
+          },
+          {
+            jp: "窓を開けていただけますか？",
+            en: "Could you open the window?",
+            accepts: ["Could you open the window please", "Can you open the window", "Would you open the window"],
+            cue: "少し暑そうな部屋で、閉まった窓を指さして丁寧にお願いしている",
+            emoji: "🪟🌬️",
+            promptEn: "It feels a bit warm in here. Need anything?",
+            promptJp: "ここ少し暑いですね。何かしましょうか？",
+            altExpr: "Would you mind opening the window? / Can we get some fresh air?",
+            advice: "目の前にある特定の窓なので a ではなく the window にするのが自然だよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A polite person in a warm room gently pointing with an open palm toward a closed glass window with a friendly requesting expression, while a friend stands near the window."
+          },
+          {
+            jp: "写真を撮っていただけますか？",
+            en: "Could you take a picture?",
+            accepts: ["Could you take a photo", "Could you take a picture of us", "Could you take a photo for me", "Can you take a picture"],
+            cue: "観光地でスマホを差し出しながら、通行人に笑顔でお願いしている",
+            emoji: "📸😊",
+            promptEn: "Excuse me, do you need any help?",
+            promptJp: "すみません、何かお手伝いしましょうか？",
+            altExpr: "Could you take a photo of us? / Would you mind taking a quick picture?",
+            advice: "「私たちの写真を撮って」なら take a picture of us / for me を足すと完璧！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling tourist holding out a smartphone camera politely toward a friendly passerby in front of a scenic park, asking for a photo."
+          },
+          {
+            jp: "もう少しゆっくり話していただけますか？",
+            en: "Could you speak more slowly?",
+            accepts: ["Could you speak a little more slowly", "Could you speak slowly", "Can you speak more slowly"],
+            cue: "両手のひらをゆっくり下に動かして、落ち着いて話してほしいとジェスチャーしている",
+            emoji: "🐢💬",
+            promptEn: "Did you catch everything I just explained?",
+            promptJp: "今説明したこと、全部聞き取れましたか？",
+            altExpr: "Could you slow down a bit? / A little slower, please.",
+            advice: "speak more slowly の前に a little を入れて a little more slowly にするとネイティブ度が一気に上がるよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A polite smiling person gently moving both palms downward in a calm slow-down gesture while talking to a friendly speaker, with a small cute turtle icon in a thought bubble."
+          },
+          {
+            jp: "この荷物を運ぶのを手伝っていただけますか？",
+            en: "Could you help me carry this bag?",
+            accepts: ["Could you help me with this bag", "Could you help me carry these bags", "Could you help me carry this luggage"],
+            cue: "重そうな大きなバッグの前で、困り笑顔で助けをお願いしている",
+            emoji: "🧳🤝",
+            promptEn: "That looks really heavy! What can I do?",
+            promptJp: "すごく重そうですね！何か手伝いましょうか？",
+            altExpr: "Could you give me a hand with this bag? / Can you help me with my luggage?",
+            advice: "help + 人 + 動詞の原形（help me carry ～）は超頻出の形！to は省略するのが会話の基本だよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person standing next to a large heavy suitcase and shopping bag, smiling politely and gesturing with open hands to ask a friendly nearby person for help lifting it."
+          }
+        ]
+      },
+      {
+        id: "thinking-about",
+        title: "I'm thinking about ～ing",
+        level: "予定・検討中",
+        subtitle: "「～しようか考え中なんだ」を柔らかく伝える",
+        description: "まだ100%決まっていないアイデアや計画を話すときに大活躍！about の後ろは必ず動詞の ing 形だよ。",
+        questions: [
+          {
+            jp: "新しいノートパソコンを買おうか考えています。",
+            en: "I'm thinking about buying a new laptop.",
+            accepts: ["I am thinking about buying a new laptop", "I'm thinking of buying a new laptop", "I'm thinking about getting a new laptop"],
+            cue: "顎に手を当てて、スリムなノートパソコンを思い浮かべている",
+            emoji: "💻🤔",
+            promptEn: "Your computer looks slow. What are you going to do?",
+            promptJp: "パソコン遅そうだね。どうするつもり？",
+            altExpr: "I might get a new laptop soon. / I'm considering buying a new laptop.",
+            advice: "about の後ろは名詞か動名詞（〜ing）！buy の代わりに get を使ってもすごく自然だよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A thoughtful person resting their chin on their hand looking upward, with a thought bubble above their head showing a sleek modern laptop computer."
+          },
+          {
+            jp: "来月引っ越そうか考えています。",
+            en: "I'm thinking about moving next month.",
+            accepts: ["I am thinking about moving next month", "I'm thinking of moving next month", "I'm thinking about moving to a new place next month"],
+            cue: "段ボール箱と新しいアパートの鍵を思い浮かべて検討している",
+            emoji: "📦🏠",
+            promptEn: "Do you have any big plans for next month?",
+            promptJp: "来月、何か大きな予定はある？",
+            altExpr: "I'm considering moving to a new apartment next month.",
+            advice: "「引っ越す」は move 1語でバッチリ通じるよ！move to Tokyo のように場所を足してもOK。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person tapping their chin thoughtfully with a thought bubble showing cardboard moving boxes, a cozy new apartment building, and a house key."
+          },
+          {
+            jp: "ジムに通い始めようか考えています。",
+            en: "I'm thinking about joining a gym.",
+            accepts: ["I am thinking about joining a gym", "I'm thinking about going to the gym", "I'm thinking of joining a gym"],
+            cue: "ダンベルやランニングマシンで運動する自分を想像している",
+            emoji: "🏋️‍♂️🤔",
+            promptEn: "How do you plan to stay in shape?",
+            promptJp: "どうやって体型や健康を維持するつもり？",
+            altExpr: "I'm thinking about starting to work out at a gym.",
+            advice: "「ジムに入会する・通い始める」は join a gym がネイティブの定番表現だよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person standing thoughtfully with a finger on their chin, with a thought bubble showing a bright fitness gym with dumbbells and a treadmill."
+          },
+          {
+            jp: "今週末は家でゆっくりしようか考えています。",
+            en: "I'm thinking about relaxing at home this weekend.",
+            accepts: ["I am thinking about relaxing at home this weekend", "I'm thinking about staying home this weekend", "I'm thinking of relaxing at home this weekend"],
+            cue: "ソファで毛布にくるまってくつろぐ週末を想像している",
+            emoji: "🛋️😌",
+            promptEn: "What are you up to this weekend?",
+            promptJp: "今週末は何をする予定？",
+            altExpr: "I might just chill at home this weekend. / I'll probably take it easy at home.",
+            advice: "relax at home のほかに、カジュアルなら chill at home もネイティブがよく使うよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person smiling gently with a hand on their chin, imagining themselves in a thought bubble lounging comfortably on a soft sofa with a warm blanket and tea."
+          },
+          {
+            jp: "転職しようか考えています。",
+            en: "I'm thinking about changing jobs.",
+            accepts: ["I am thinking about changing jobs", "I'm thinking about changing my job", "I'm thinking of changing jobs"],
+            cue: "今のデスクと新しいオフィスへの道を見比べてじっくり考えている",
+            emoji: "💼🔄",
+            promptEn: "How's work going these days?",
+            promptJp: "最近、仕事の調子はどう？",
+            altExpr: "I'm considering looking for a new job. / I might switch careers.",
+            advice: "「転職する」は change jobs と複数形にするのが自然な英語表現だよ（今の仕事と次の仕事の2つがあるイメージ）。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. An office worker in smart casual clothes holding their chin thoughtfully, with a thought bubble showing a briefcase and a bright path leading toward a fresh new office building."
+          }
+        ]
+      },
+      {
+        id: "it-takes",
+        title: "It takes ～ to ...",
+        level: "所要時間・労力",
+        subtitle: "「…するのに～かかる」をスムーズに説明する",
+        description: "通勤時間や移動時間、作業時間を伝える鉄板構文。主語を It にして、後ろに時間→ to 動詞 を並べるだけ！",
+        questions: [
+          {
+            jp: "駅まで歩くのに10分かかります。",
+            en: "It takes ten minutes to walk to the station.",
+            accepts: ["It takes 10 minutes to walk to the station", "It takes ten minutes to get to the station on foot"],
+            cue: "時計の10分ゾーンと、駅へ向かって歩く人のシルエット",
+            emoji: "⏱️🚶‍♂️🚉",
+            promptEn: "How long does it take to walk to the station from here?",
+            promptJp: "ここから駅まで歩いてどれくらいかかりますか？",
+            altExpr: "It's a ten-minute walk to the station.",
+            advice: "「It takes + 時間 + to + 動詞」の語順をリズムで覚えよう！数字は 10 でも ten でもOK。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person walking briskly along a sidewalk toward a train station building, with a large stylized clock face in the sky showing a 10-minute highlighted wedge."
+          },
+          {
+            jp: "空港まで電車で1時間かかります。",
+            en: "It takes an hour to get to the airport by train.",
+            accepts: ["It takes one hour to get to the airport by train", "It takes an hour by train to get to the airport", "It takes one hour to go to the airport by train"],
+            cue: "時計の1周と、空港へ向かう電車と飛行機のイメージ",
+            emoji: "🕒🚃✈️",
+            promptEn: "How long does it take to get to the airport?",
+            promptJp: "空港までどれくらい時間がかかりますか？",
+            altExpr: "It's about an hour by train to the airport.",
+            advice: "「到着する」は go よりも get to ～ が自然！an hour は「アナウアー」とつなげて発音しよう。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A sleek commuter train speeding toward an airport terminal with an airplane taking off, accompanied by a clean circular clock graphic highlighting a full one-hour sweep."
+          },
+          {
+            jp: "夕食を作るのに30分かかります。",
+            en: "It takes thirty minutes to cook dinner.",
+            accepts: ["It takes 30 minutes to cook dinner", "It takes thirty minutes to make dinner", "It takes 30 minutes to make dinner", "It takes half an hour to make dinner"],
+            cue: "時計の半分（30分）と、フライパンで楽しく夕食を作る姿",
+            emoji: "⏲️🍳🍽️",
+            promptEn: "How long will dinner take?",
+            promptJp: "夕飯ができるまでどれくらいかかりそう？",
+            altExpr: "Dinner will be ready in about half an hour.",
+            advice: "30分は thirty minutes でも half an hour でもOK！cook dinner も make dinner も両方使えるよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling home cook stirring a pan of delicious dinner in a warm kitchen, with a clean clock face graphic beside them highlighting a 30-minute half circle."
+          },
+          {
+            jp: "新しい言語を学ぶには時間がかかります。",
+            en: "It takes time to learn a new language.",
+            accepts: ["It takes a long time to learn a new language", "Learning a new language takes time"],
+            cue: "砂時計と、少しずつ成長していく芽と本・地球のイメージ",
+            emoji: "⏳📚🌱",
+            promptEn: "Why isn't my English improving overnight?",
+            promptJp: "どうして一晩で英語がペラペラにならないんだろう？",
+            altExpr: "Learning a language doesn't happen overnight. / It requires patience.",
+            advice: "It takes time to ～ は「～には時間がかかるものだよ」という励ましでも超よく使う名フレーズ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A calm symbolic scene showing an hourglass, open study notebooks, a small sprouting green plant growing taller, and a globe."
+          },
+          {
+            jp: "この仕事を終わらせるのに2日かかります。",
+            en: "It takes two days to finish this work.",
+            accepts: ["It takes 2 days to finish this work", "It takes two days to finish this job", "It takes two days to complete this task", "It will take two days to finish this work"],
+            cue: "カレンダーの2日分のマークと、デスクで資料を仕上げる姿",
+            emoji: "📅💼✅",
+            promptEn: "How long do you need to finish this work?",
+            promptJp: "この仕事を終わらせるのにどれくらい必要ですか？",
+            altExpr: "I'll need two days to wrap this up.",
+            advice: "「終わらせる」は finish this work / task。未来の予定として言うなら It'll take two days ～ もバッチリ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A focused worker at a neat desk with documents and a laptop, with a visual wall calendar icon beside them showing two consecutive days highlighted with checkmarks."
+          }
+        ]
+      },
+      {
+        id: "used-to",
+        title: "I used to ～",
+        level: "過去の習慣",
+        subtitle: "「昔はよく～したものだ（今はしていない）」を語る",
+        description: "昔の話や思い出トークで会話が弾む鉄板表現！発音は「ユース・トゥ」のように濁らず軽くつなげるのがコツだよ。",
+        questions: [
+          {
+            jp: "私は昔よくサッカーをしていました。",
+            en: "I used to play soccer.",
+            accepts: ["I used to play football", "I used to play soccer a lot"],
+            cue: "セピア調の思い出雲の中で、サッカーボールを元気に蹴る昔の姿",
+            emoji: "⚽💭",
+            promptEn: "Did you play any sports when you were a kid?",
+            promptJp: "子どもの頃、何かスポーツをしていましたか？",
+            altExpr: "I played soccer when I was younger.",
+            advice: "used to を使うだけで「昔はやっていたけど、今はもうやっていない」というニュアンスが一発で伝わるよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling adult looking nostalgic with a warm sepia-toned memory cloud above them showing their younger self happily kicking a soccer ball on a field."
+          },
+          {
+            jp: "私は昔大阪に住んでいました。",
+            en: "I used to live in Osaka.",
+            accepts: ["I used to live in Osaka city"],
+            cue: "懐かしい思い出雲の中に、賑やかな大阪の街並みとお城が見える",
+            emoji: "🏯💭",
+            promptEn: "Have you always lived in Tokyo?",
+            promptJp: "ずっと東京に住んでいたんですか？",
+            altExpr: "I lived in Osaka a few years ago.",
+            advice: "動作だけでなく「昔住んでいた」という過去の状態にも used to live in ～ が使えるよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling person reminiscing warmly with a sepia-tinted memory cloud showing a charming Japanese castle and lively riverside cityscape at dusk."
+          },
+          {
+            jp: "私は昔毎朝走っていました。",
+            en: "I used to run every morning.",
+            accepts: ["I used to jog every morning", "I used to go running every morning", "I used to go for a run every morning"],
+            cue: "朝日の差す公園をさわやかにジョギングしていた昔の記憶",
+            emoji: "🏃‍♂️🌅💭",
+            promptEn: "Do you exercise in the mornings?",
+            promptJp: "朝に運動したりしますか？",
+            altExpr: "I used to go for a morning run, though I stopped recently.",
+            advice: "run でも jog でもOK！「以前は習慣だった」という昔話にぴったりなフレーズだよ。",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A nostalgic person smiling gently with a warm vintage-tinted memory cloud showing themselves jogging happily through a park at sunrise."
+          },
+          {
+            jp: "私は昔コーヒーが嫌いでした。",
+            en: "I used to hate coffee.",
+            accepts: ["I used to dislike coffee", "I didn't use to like coffee", "I didn't used to like coffee"],
+            cue: "今は笑顔でコーヒーを持ちつつ、昔は苦い顔をしていた思い出雲",
+            emoji: "☕😖💭",
+            promptEn: "Wow, you really love coffee, don't you?",
+            promptJp: "わあ、本当にコーヒーが好きなんですね？",
+            altExpr: "Believe it or not, I couldn't stand coffee back then.",
+            advice: "hate は「大嫌い」という意味だけど、食べ物の好みではネイティブもカジュアルによく使うよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A person happily enjoying a cup of coffee now, while a sepia-toned memory cloud above shows their younger self making a funny bitter face at a coffee cup."
+          },
+          {
+            jp: "私は昔よくこのカフェに来ていました。",
+            en: "I used to come to this cafe.",
+            accepts: ["I used to come to this cafe a lot", "I used to visit this cafe", "I used to go to this cafe"],
+            cue: "居心地のいいカフェの前で、懐かしそうに昔の自分を思い出している",
+            emoji: "☕🏡💭",
+            promptEn: "Do you know this cafe well?",
+            promptJp: "このカフェのこと、よく知っているんですか？",
+            altExpr: "I was a regular at this cafe back in the day.",
+            advice: "今そのカフェにいる（または目の前にいる）なら go ではなく come to this cafe が自然だよ！",
+            imagePrompt: "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. A smiling person standing warmly in front of a cozy neighborhood cafe, with a soft sepia memory cloud showing them relaxing by the cafe window in the past."
+          }
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 2. アプリ状態管理
+    // =========================================================================
+    const state = {
+      currentTopic: PRESET_TOPICS[0],
+      phase: "home", // home | training | transition | summary | history
+      stage: 1, // 1 | 2 | 3
+      nextTransitionTarget: 2, // 2 or 3
+
+      // 設定（localStorageに保存）
+      timerSeconds: 8,
+      ttsSpeed: 1,
+      pauseOnSpeech: true,
+      soundEnabled: true,
+      illustrationEnabled: true,
+      userApiKey: "",
+
+      // トレーニング進行状態
+      queue: [],
+      retryQueue: [],
+      isRetryRound: false,
+      clearedIndices: new Set(),
+      currentQuestionIdx: 0,
+      currentQuestion: null,
+
+      // セッション計測
+      sessionStartTime: 0,
+      sessionAttempts: 0,
+      sessionCorrects: 0,
+
+      // 音声認識 & タイマー状態
+      isListening: false,
+      hasSpokenThisTurn: false,
+      latestTranscript: "",
+      isEvaluating: false,
+      timerInterval: null,
+      timerRemainingMs: 0,
+      timerTotalMs: 0,
+      lastTickSec: null,
+      silenceTimeout: null,
+      promptFallbackTimer: null,
+
+      // Stage 2 背景イラスト先読み管理
+      bgImages: {}, // { [questionIdx]: { status: 'idle'|'loading'|'done'|'error', url: string|null } }
+      bgGenRunId: 0,
+
+      // 統計（localStorageに保存）
       stats: {
         streak: 0,
         totalClearedSets: 0,
         lastClearedDate: null
       },
+
       // v7：学習履歴（クリアしたお題データとスコアを保存）
       history: []
     };
 
+    // =========================================================================
+    // 3. 永続化ユーティリティ（統計・設定・APIキー・学習履歴）
+    // =========================================================================
     function getTodayDateString() {
-// ... existing code ... -->
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function getYesterdayDateString() {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function loadStats() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          state.stats = {
+            streak: Number(parsed.streak) || 0,
+            totalClearedSets: Number(parsed.totalClearedSets) || 0,
+            lastClearedDate: parsed.lastClearedDate || null
+          };
+          // 連続日数が途切れていれば表示上リセット
+          const today = getTodayDateString();
+          const yesterday = getYesterdayDateString();
+          if (state.stats.lastClearedDate && state.stats.lastClearedDate !== today && state.stats.lastClearedDate !== yesterday) {
+            state.stats.streak = 0;
+          }
+        }
+      } catch (e) {}
+    }
+
+    function saveStats() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state.stats));
       } catch (e) {}
+    }
+
+    function recordDailyClear() {
+      const today = getTodayDateString();
+      const yesterday = getYesterdayDateString();
+      if (state.stats.lastClearedDate === today) {
+        // 同日の追加セット
+      } else if (state.stats.lastClearedDate === yesterday) {
+        state.stats.streak += 1;
+      } else {
+        state.stats.streak = 1;
+      }
+      state.stats.lastClearedDate = today;
+      state.stats.totalClearedSets += 1;
+      saveStats();
+    }
+
+    function loadUserSettings() {
+      try {
+        const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+        if (savedKey) state.userApiKey = savedKey.trim();
+
+        const rawPrefs = localStorage.getItem(PREFS_STORAGE_KEY);
+        if (rawPrefs) {
+          const prefs = JSON.parse(rawPrefs);
+          if (typeof prefs.timerSeconds === "number") state.timerSeconds = prefs.timerSeconds;
+          if (typeof prefs.ttsSpeed === "number") state.ttsSpeed = prefs.ttsSpeed;
+          if (typeof prefs.pauseOnSpeech === "boolean") state.pauseOnSpeech = prefs.pauseOnSpeech;
+          if (typeof prefs.soundEnabled === "boolean") state.soundEnabled = prefs.soundEnabled;
+          if (typeof prefs.illustrationEnabled === "boolean") state.illustrationEnabled = prefs.illustrationEnabled;
+        }
+      } catch (e) {}
+      syncSettingsUI();
+    }
+
+    function saveUserPrefs() {
+      try {
+        localStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify({
+          timerSeconds: state.timerSeconds,
+          ttsSpeed: state.ttsSpeed,
+          pauseOnSpeech: state.pauseOnSpeech,
+          soundEnabled: state.soundEnabled,
+          illustrationEnabled: state.illustrationEnabled
+        }));
+      } catch (e) {}
+    }
+
+    function getActiveApiKey() {
+      return (state.userApiKey || defaultEnvApiKey || "").trim();
     }
 
     /** 学習履歴をlocalStorageから読み込み */
@@ -806,7 +1290,6 @@
     /** クリアしたお題を学習履歴に追加・更新（AI生成お題も含めて完全保存） */
     function recordTopicHistory(topic, elapsedSec, accuracy) {
       const nowIso = new Date().toISOString();
-      // お題データのディープコピー（復習時に完全復元できるよう保持）
       const topicSnapshot = JSON.parse(JSON.stringify(topic));
       const existingIdx = state.history.findIndex(
         item => item.topicId === topic.id || item.topic.title === topic.title
@@ -824,7 +1307,6 @@
           bestAccuracy: Math.max(prev.bestAccuracy || 0, accuracy),
           lastElapsedSec: elapsedSec
         };
-        // 最新を先頭に移動
         state.history.splice(existingIdx, 1);
         state.history.unshift(updated);
       } else {
@@ -840,7 +1322,6 @@
         });
       }
 
-      // 最大50件まで保持
       if (state.history.length > 50) {
         state.history = state.history.slice(0, 50);
       }
@@ -848,14 +1329,14 @@
       updateHistoryBadge();
     }
 
-    function updateHistoryBadge() {
-      const count = state.history.length;
-      if (el.historyCountBadge) {
-        el.historyCountBadge.textContent = String(count);
-        el.historyCountBadge.classList.toggle("hidden", count === 0);
-      }
-    }
-// ... existing code ... -->
+    // =========================================================================
+    // 4. DOM要素参照
+    // =========================================================================
+    const el = {
+      toastContainer: document.getElementById("toast-container"),
+      btnHeaderHome: document.getElementById("btn-header-home"),
+      bgGenPill: document.getElementById("bg-gen-pill"),
+      bgGenDot: document.getElementById("bg-gen-dot"),
       bgGenText: document.getElementById("bg-gen-text"),
       btnOpenHistory: document.getElementById("btn-open-history"),
       historyCountBadge: document.getElementById("history-count-badge"),
@@ -865,17 +1346,119 @@
       btnOpenSettings: document.getElementById("btn-open-settings"),
       settingsBadgeDot: document.getElementById("settings-badge-dot"),
 
+      // 各画面
       screenHome: document.getElementById("screen-home"),
       screenTraining: document.getElementById("screen-training"),
       screenTransition: document.getElementById("screen-transition"),
       screenSummary: document.getElementById("screen-summary"),
       screenHistory: document.getElementById("screen-history"),
 
+      // ホーム画面
       statStreak: document.getElementById("stat-streak"),
       statTotalSets: document.getElementById("stat-total-sets"),
       btnHomeOpenHistory: document.getElementById("btn-home-open-history"),
+      homeTopicLevel: document.getElementById("home-topic-level"),
       homeTopicTitle: document.getElementById("home-topic-title"),
-// ... existing code ... -->
+      homeTopicDesc: document.getElementById("home-topic-desc"),
+      presetTopicsList: document.getElementById("preset-topics-list"),
+      aiTopicInput: document.getElementById("ai-topic-input"),
+      btnGenerateTopic: document.getElementById("btn-generate-topic"),
+      genTopicIcon: document.getElementById("gen-topic-icon"),
+      genTopicText: document.getElementById("gen-topic-text"),
+      btnStartTraining: document.getElementById("btn-start-training"),
+      togglePauseSpeech: document.getElementById("toggle-pause-speech"),
+      toggleIllustHome: document.getElementById("toggle-illust-home"),
+      homeIllustModeBadge: document.getElementById("home-illust-mode-badge"),
+      homeApikeyBanner: document.getElementById("home-apikey-banner"),
+      btnBannerOpenSettings: document.getElementById("btn-banner-open-settings"),
+      homeMicWarning: document.getElementById("home-mic-warning"),
+
+      // トレーニング画面
+      trainStageBadge: document.getElementById("train-stage-badge"),
+      trainLoopBadge: document.getElementById("train-loop-badge"),
+      trainTopicLabel: document.getElementById("train-topic-label"),
+      trainProgressBar: document.getElementById("train-progress-bar"),
+      trainProgressText: document.getElementById("train-progress-text"),
+      questionNumberBadge: document.getElementById("question-number-badge"),
+      timerContainer: document.getElementById("timer-container"),
+      timerStatusText: document.getElementById("timer-status-text"),
+      timerRing: document.getElementById("timer-ring"),
+      timerText: document.getElementById("timer-text"),
+
+      stage1PromptArea: document.getElementById("stage1-prompt-area"),
+      questionJp: document.getElementById("question-jp"),
+
+      stage2PromptArea: document.getElementById("stage2-prompt-area"),
+      btnRegenCurrentImg: document.getElementById("btn-regen-current-img"),
+      questionImageBox: document.getElementById("question-image-box"),
+      btnShowCueHint: document.getElementById("btn-show-cue-hint"),
+      btnShowJpHint: document.getElementById("btn-show-jp-hint"),
+      cueHintBox: document.getElementById("cue-hint-box"),
+      jpHintBox: document.getElementById("jp-hint-box"),
+
+      stage3PromptArea: document.getElementById("stage3-prompt-area"),
+      stage3SpeakerPulse: document.getElementById("stage3-speaker-pulse"),
+      stage3SpeakerAvatar: document.getElementById("stage3-speaker-avatar"),
+      stage3ListenStatus: document.getElementById("stage3-listen-status"),
+      btnReplayPrompt: document.getElementById("btn-replay-prompt"),
+      btnStage3SpeedToggle: document.getElementById("btn-stage3-speed-toggle"),
+      btnShowPromptHint: document.getElementById("btn-show-prompt-hint"),
+      stage3PromptHintBox: document.getElementById("stage3-prompt-hint-box"),
+
+      inputArea: document.getElementById("input-area"),
+      transcriptDisplay: document.getElementById("transcript-display"),
+      micPulseRing: document.getElementById("mic-pulse-ring"),
+      btnMic: document.getElementById("btn-mic"),
+      micStatusLabel: document.getElementById("mic-status-label"),
+      btnEvalNow: document.getElementById("btn-eval-now"),
+      btnSkip: document.getElementById("btn-skip"),
+      keyboardForm: document.getElementById("keyboard-form"),
+      keyboardInput: document.getElementById("keyboard-input"),
+
+      evaluatingArea: document.getElementById("evaluating-area"),
+
+      resultArea: document.getElementById("result-area"),
+      resultBanner: document.getElementById("result-banner"),
+      resultIcon: document.getElementById("result-icon"),
+      resultTitle: document.getElementById("result-title"),
+      resultSubtitle: document.getElementById("result-subtitle"),
+      resultSpeedBadge: document.getElementById("result-speed-badge"),
+      btnNextQuestion: document.getElementById("btn-next-question"),
+      btnNextText: document.getElementById("btn-next-text"),
+      resultUserText: document.getElementById("result-user-text"),
+      resultStage3PromptBox: document.getElementById("result-stage3-prompt-box"),
+      btnResultPlayPrompt: document.getElementById("btn-result-play-prompt"),
+      resultPromptEn: document.getElementById("result-prompt-en"),
+      resultPromptJp: document.getElementById("result-prompt-jp"),
+      btnResultSpeedToggle: document.getElementById("btn-result-speed-toggle"),
+      btnPlayAudio: document.getElementById("btn-play-audio"),
+      resultCorrectEn: document.getElementById("result-correct-en"),
+      resultJp: document.getElementById("result-jp"),
+      resultAdvice: document.getElementById("result-advice"),
+      resultAltBox: document.getElementById("result-alt-box"),
+      resultAltText: document.getElementById("result-alt-text"),
+
+      // トランジション画面
+      transHeroIcon: document.getElementById("trans-hero-icon"),
+      transBadge: document.getElementById("trans-badge"),
+      transTitle: document.getElementById("trans-title"),
+      transDesc: document.getElementById("trans-desc"),
+      transIllustPanel: document.getElementById("trans-illust-panel"),
+      transImgStatus: document.getElementById("trans-img-status"),
+      transImgCount: document.getElementById("trans-img-count"),
+      transImgBar: document.getElementById("trans-img-bar"),
+      transImgGrid: document.getElementById("trans-img-grid"),
+      transReadyHint: document.getElementById("trans-ready-hint"),
+      transStage3Panel: document.getElementById("trans-stage3-panel"),
+      btnStartNextStage: document.getElementById("btn-start-next-stage"),
+      btnStartNextIcon: document.getElementById("btn-start-next-icon"),
+      btnStartNextLabel: document.getElementById("btn-start-next-label"),
+
+      // リザルト画面
+      summaryTopicTitle: document.getElementById("summary-topic-title"),
+      summaryTime: document.getElementById("summary-time"),
+      summaryAccuracy: document.getElementById("summary-accuracy"),
+      summaryStreak: document.getElementById("summary-streak"),
       summaryPhraseList: document.getElementById("summary-phrase-list"),
       btnSummaryRetry: document.getElementById("btn-summary-retry"),
       btnSummaryNewTopic: document.getElementById("btn-summary-new-topic"),
@@ -892,7 +1475,218 @@
       btnHistoryEmptyStart: document.getElementById("btn-history-empty-start"),
 
       // 設定モーダル
-// ... existing code ... -->
+      modalSettings: document.getElementById("modal-settings"),
+      btnCloseSettings: document.getElementById("btn-close-settings"),
+      modalApikeyStatus: document.getElementById("modal-apikey-status"),
+      inputApiKey: document.getElementById("input-api-key"),
+      btnToggleKeyVis: document.getElementById("btn-toggle-key-vis"),
+      btnSaveApikey: document.getElementById("btn-save-apikey"),
+      btnTestApikey: document.getElementById("btn-test-apikey"),
+      btnTestApikeyLabel: document.getElementById("btn-test-apikey-label"),
+      btnClearApikey: document.getElementById("btn-clear-apikey"),
+      apikeyTestResult: document.getElementById("apikey-test-result"),
+      toggleIllustModal: document.getElementById("toggle-illust-modal"),
+      btnTogglePwaGuide: document.getElementById("btn-toggle-pwa-guide"),
+      pwaGuideArrow: document.getElementById("pwa-guide-arrow"),
+      pwaGuideContent: document.getElementById("pwa-guide-content")
+    };
+
+    // =========================================================================
+    // 5. 動的 Web App Manifest（PWAホーム画面追加対応）
+    // =========================================================================
+    function injectDynamicManifest() {
+      try {
+        const svgIcon = "data:image/svg+xml," + encodeURIComponent(
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4f46e5"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs><rect width="192" height="192" rx="44" fill="url(#g)"/><circle cx="96" cy="96" r="64" fill="white" fill-opacity="0.14"/><path d="M96 48a20 20 0 0 0-20 20v30a20 20 0 0 0 40 0V68a20 20 0 0 0-20-20z" fill="white"/><path d="M60 94a36 36 0 0 0 72 0M96 130v22M76 152h40" stroke="white" stroke-width="11" stroke-linecap="round" fill="none"/></svg>`
+        );
+        const manifest = {
+          name: "英語脳アウトプット道場",
+          short_name: "英語脳道場",
+          description: "瞬間英作文・イラスト直結・即答会話の3ステージ英会話トレーニングアプリ",
+          start_url: window.location.href,
+          display: "standalone",
+          background_color: "#f8fafc",
+          theme_color: "#4f46e5",
+          icons: [
+            { src: svgIcon, sizes: "192x192", type: "image/svg+xml", purpose: "any maskable" },
+            { src: svgIcon, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
+          ]
+        };
+        const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+        const link = document.createElement("link");
+        link.rel = "manifest";
+        link.href = URL.createObjectURL(blob);
+        document.head.appendChild(link);
+      } catch (e) {}
+    }
+
+    // =========================================================================
+    // 6. 効果音エンジン（Web Audio API）＆ 音声読み上げ（TTS）
+    // =========================================================================
+    let audioCtx = null;
+
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    }
+
+    /** 正解音：「ピンポーン♪」 */
+    function playCorrectSound() {
+      if (!state.soundEnabled) return;
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+
+      const notes = [
+        { freq: 880, start: 0, dur: 0.14 },
+        { freq: 1174.66, start: 0.13, dur: 0.34 }
+      ];
+      notes.forEach(n => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(n.freq, now + n.start);
+        gain.gain.setValueAtTime(0.001, now + n.start);
+        gain.gain.exponentialRampToValueAtTime(0.22, now + n.start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + n.start + n.dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + n.start);
+        osc.stop(now + n.start + n.dur + 0.02);
+      });
+    }
+
+    /** 不正解音：「ブブー」 */
+    function playIncorrectSound() {
+      if (!state.soundEnabled) return;
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+
+      [0, 0.16].forEach(offset => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(165, now + offset);
+        gain.gain.setValueAtTime(0.001, now + offset);
+        gain.gain.linearRampToValueAtTime(0.11, now + offset + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.13);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.14);
+      });
+    }
+
+    /** 残り3秒カウントダウン・ティック音 */
+    function playTickSound() {
+      if (!state.soundEnabled) return;
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(660, now);
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.08, now + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.06);
+    }
+
+    /** 全ステージクリア・お祝いファンファーレ */
+    function playFanfareSound() {
+      if (!state.soundEnabled) return;
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const notes = [
+        { freq: 523.25, start: 0.0, dur: 0.14 },
+        { freq: 659.25, start: 0.12, dur: 0.14 },
+        { freq: 783.99, start: 0.24, dur: 0.14 },
+        { freq: 1046.5, start: 0.36, dur: 0.48 }
+      ];
+      notes.forEach(n => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(n.freq, now + n.start);
+        gain.gain.setValueAtTime(0.001, now + n.start);
+        gain.gain.exponentialRampToValueAtTime(0.18, now + n.start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + n.start + n.dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + n.start);
+        osc.stop(now + n.start + n.dur + 0.02);
+      });
+    }
+
+    /** 英語音声読み上げ（TTS：終了時コールバック対応） */
+    function speakEnglish(text, onEndCallback = null) {
+      if (!("speechSynthesis" in window)) {
+        if (onEndCallback) onEndCallback();
+        return;
+      }
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = "en-US";
+        utter.rate = state.ttsSpeed;
+        utter.pitch = 1.0;
+
+        const voices = window.speechSynthesis.getVoices();
+        const preferred = voices.find(v => /en[-_]US/i.test(v.lang) && /Google|Samantha|Alex|Natural/i.test(v.name))
+          || voices.find(v => /en[-_]US/i.test(v.lang))
+          || voices.find(v => /^en/i.test(v.lang));
+        if (preferred) utter.voice = preferred;
+
+        let finished = false;
+        const done = () => {
+          if (finished) return;
+          finished = true;
+          if (onEndCallback) onEndCallback();
+        };
+        utter.onend = done;
+        utter.onerror = done;
+
+        window.speechSynthesis.speak(utter);
+      } catch (e) {
+        if (onEndCallback) onEndCallback();
+      }
+    }
+
+    // =========================================================================
+    // 7. トースト通知＆画面切替
+    // =========================================================================
+    function showToast(message, type = "info") {
+      const colors = {
+        info: "bg-slate-900 text-white border-slate-700",
+        success: "bg-emerald-600 text-white border-emerald-500",
+        warning: "bg-amber-500 text-white border-amber-400",
+        error: "bg-rose-600 text-white border-rose-500"
+      };
+      const div = document.createElement("div");
+      div.className = `pointer-events-auto px-4 py-2.5 rounded-2xl border text-xs sm:text-sm font-bold shadow-lg animate-fade-up ${colors[type] || colors.info}`;
+      div.textContent = message;
+      el.toastContainer.appendChild(div);
+      setTimeout(() => {
+        div.style.opacity = "0";
+        div.style.transition = "opacity 0.25s ease";
+        setTimeout(() => div.remove(), 260);
+      }, 2800);
+    }
+
     function showScreen(name) {
       el.screenHome.classList.toggle("hidden", name !== "home");
       el.screenTraining.classList.toggle("hidden", name !== "training");
@@ -900,7 +1694,1098 @@
       el.screenSummary.classList.toggle("hidden", name !== "summary");
       el.screenHistory.classList.toggle("hidden", name !== "history");
     }
-// ... existing code ... -->
+
+    function updateHistoryBadge() {
+      const count = state.history.length;
+      if (el.historyCountBadge) {
+        el.historyCountBadge.textContent = String(count);
+        el.historyCountBadge.classList.toggle("hidden", count === 0);
+      }
+    }
+
+    // =========================================================================
+    // 8. 設定UI同期＆モーダル制御
+    // =========================================================================
+    function syncSpeedButtonsUI() {
+      document.querySelectorAll(".tts-speed-btn").forEach(btn => {
+        const active = Number(btn.dataset.speed) === state.ttsSpeed;
+        btn.className = active
+          ? "tts-speed-btn px-3 py-1.5 rounded-lg text-xs font-extrabold transition bg-white text-indigo-700 shadow-sm"
+          : "tts-speed-btn px-3 py-1.5 rounded-lg text-xs font-extrabold transition text-slate-500 hover:text-slate-800";
+      });
+      document.querySelectorAll(".summary-speed-btn").forEach(btn => {
+        const active = Number(btn.dataset.speed) === state.ttsSpeed;
+        btn.className = active
+          ? "summary-speed-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition bg-white text-indigo-700 shadow-sm"
+          : "summary-speed-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition text-slate-500 hover:text-slate-800";
+      });
+      const label = state.ttsSpeed === 0.75 ? "0.75x" : "1.0x";
+      if (el.btnResultSpeedToggle) el.btnResultSpeedToggle.textContent = label;
+      if (el.btnStage3SpeedToggle) el.btnStage3SpeedToggle.textContent = label;
+    }
+
+    function syncTimerButtonsUI() {
+      document.querySelectorAll(".timer-opt-btn").forEach(btn => {
+        const active = Number(btn.dataset.seconds) === state.timerSeconds;
+        btn.className = active
+          ? "timer-opt-btn px-3 py-1.5 rounded-lg text-xs font-extrabold transition bg-white text-indigo-700 shadow-sm"
+          : "timer-opt-btn px-3 py-1.5 rounded-lg text-xs font-extrabold transition text-slate-500 hover:text-slate-800";
+      });
+    }
+
+    function syncSettingsUI() {
+      syncTimerButtonsUI();
+      syncSpeedButtonsUI();
+      el.togglePauseSpeech.checked = state.pauseOnSpeech;
+      el.toggleIllustHome.checked = state.illustrationEnabled;
+      el.toggleIllustModal.checked = state.illustrationEnabled;
+
+      el.soundIcon.textContent = state.soundEnabled ? "🔊" : "🔇";
+      el.soundLabel.textContent = state.soundEnabled ? "効果音 ON" : "効果音 OFF";
+
+      if (state.illustrationEnabled) {
+        el.homeIllustModeBadge.textContent = "ON";
+        el.homeIllustModeBadge.className = "px-1.5 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200";
+      } else {
+        el.homeIllustModeBadge.textContent = "OFF（無料カード）";
+        el.homeIllustModeBadge.className = "px-1.5 py-0.5 rounded-md text-[10px] font-extrabold bg-slate-100 text-slate-600 border border-slate-200";
+      }
+
+      const hasKey = Boolean(getActiveApiKey());
+      const hasUserKey = Boolean(state.userApiKey);
+      el.inputApiKey.value = state.userApiKey;
+
+      if (hasUserKey) {
+        el.modalApikeyStatus.textContent = "保存済み ✅";
+        el.modalApikeyStatus.className = "px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700";
+      } else if (defaultEnvApiKey) {
+        el.modalApikeyStatus.textContent = "プレビュー環境接続中";
+        el.modalApikeyStatus.className = "px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-700";
+      } else {
+        el.modalApikeyStatus.textContent = "未設定";
+        el.modalApikeyStatus.className = "px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800";
+      }
+
+      const showNeedKeyNotice = !hasKey;
+      el.settingsBadgeDot.classList.toggle("hidden", !showNeedKeyNotice);
+      el.homeApikeyBanner.classList.toggle("hidden", !showNeedKeyNotice);
+    }
+
+    function openSettingsModal() {
+      syncSettingsUI();
+      el.apikeyTestResult.classList.add("hidden");
+      el.modalSettings.classList.remove("hidden");
+    }
+
+    function closeSettingsModal() {
+      el.modalSettings.classList.add("hidden");
+    }
+
+    function setIllustrationEnabled(enabled) {
+      state.illustrationEnabled = Boolean(enabled);
+      saveUserPrefs();
+      syncSettingsUI();
+      updateBgGenPill();
+      if (state.illustrationEnabled && state.phase === "training" && state.stage === 1) {
+        startBackgroundImagePreload();
+      }
+      if (state.phase === "training" && state.stage === 2) {
+        renderStage2Visual(state.currentQuestionIdx);
+      }
+    }
+
+    // =========================================================================
+    // 9. テキスト正規化 ＆ 3層・超高速判定エンジン
+    // =========================================================================
+    function normalizeEnglish(str) {
+      if (!str) return "";
+      let s = str.toLowerCase().trim();
+      const contractions = [
+        [/\bwanna\b/g, "want to"],
+        [/\bgonna\b/g, "going to"],
+        [/\bgotta\b/g, "got to"],
+        [/\bi'm\b/g, "i am"],
+        [/\bi'd\b/g, "i would"],
+        [/\bi'll\b/g, "i will"],
+        [/\bi've\b/g, "i have"],
+        [/\bdon't\b/g, "do not"],
+        [/\bdoesn't\b/g, "does not"],
+        [/\bdidn't\b/g, "did not"],
+        [/\bcan't\b/g, "cannot"],
+        [/\bwon't\b/g, "will not"],
+        [/\bcouldn't\b/g, "could not"],
+        [/\bwouldn't\b/g, "would not"],
+        [/\bit's\b/g, "it is"],
+        [/\bit'll\b/g, "it will"],
+        [/\bthat's\b/g, "that is"],
+        [/\b10\b/g, "ten"],
+        [/\b30\b/g, "thirty"],
+        [/\b2\b/g, "two"],
+        [/\b1\b/g, "one"]
+      ];
+      contractions.forEach(([re, rep]) => { s = s.replace(re, rep); });
+      s = s.replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+      return s;
+    }
+
+    function wordTokens(str) {
+      const norm = normalizeEnglish(str);
+      return norm ? norm.split(" ") : [];
+    }
+
+    function wordOverlapRatio(a, b) {
+      const ta = new Set(wordTokens(a));
+      const tb = new Set(wordTokens(b));
+      if (ta.size === 0 || tb.size === 0) return 0;
+      let hit = 0;
+      ta.forEach(w => { if (tb.has(w)) hit++; });
+      return hit / Math.max(ta.size, tb.size);
+    }
+
+    /** ローカル即判定（0.05秒ファストパス：正解＆明らかな不正解） */
+    function fastLocalEvaluate(userText, question, isFinalSubmit = true) {
+      const normUser = normalizeEnglish(userText);
+      if (!normUser) {
+        return isFinalSubmit
+          ? { decided: true, isCorrect: false, advice: question.advice, source: "local" }
+          : { decided: false };
+      }
+
+      const candidates = [question.en, ...(question.accepts || [])];
+      for (const cand of candidates) {
+        const normCand = normalizeEnglish(cand);
+        if (!normCand) continue;
+        // 完全一致 または 末尾の please の有無のみ
+        if (normUser === normCand || normUser === normCand + " please" || normUser + " please" === normCand) {
+          return { decided: true, isCorrect: true, advice: question.advice, source: "local" };
+        }
+        // 高一致率（冠詞や1語の微小な音声認識ブレを許容）
+        const ratio = wordOverlapRatio(normUser, normCand);
+        if (ratio >= 0.85 && wordTokens(normUser).length >= Math.max(2, wordTokens(normCand).length - 1)) {
+          return { decided: true, isCorrect: true, advice: question.advice, source: "local" };
+        }
+      }
+
+      // 発話途中の場合は正解時のみ即確定し、不正解の誤爆を防ぐ
+      if (!isFinalSubmit) {
+        return { decided: false };
+      }
+
+      // 確定提出時：明らかに短すぎる／主要語がほぼ一致しない場合はAIを待たず0.05秒で即不正解
+      const userWords = wordTokens(normUser);
+      const targetWords = wordTokens(question.en);
+      const bestOverlap = Math.max(...candidates.map(c => wordOverlapRatio(normUser, c)));
+
+      if (userWords.length <= 1 || (userWords.length < Math.floor(targetWords.length * 0.45) && bestOverlap < 0.4)) {
+        return {
+          decided: true,
+          isCorrect: false,
+          advice: `途中で止まっちゃったかな？まずはお手本「${question.en}」を声に出してリズムをつかもう！`,
+          source: "local"
+        };
+      }
+      if (bestOverlap < 0.25 && !getActiveApiKey()) {
+        return {
+          decided: true,
+          isCorrect: false,
+          advice: question.advice,
+          source: "local"
+        };
+      }
+      if (bestOverlap < 0.2) {
+        return {
+          decided: true,
+          isCorrect: false,
+          advice: question.advice,
+          source: "local"
+        };
+      }
+
+      return { decided: false };
+    }
+
+    /** AI超軽量判定（グレーゾーン別解のみ・思考オフ＆2.5秒タイムアウト） */
+    async function evaluateAnswerWithUltraLightAI(userText, question) {
+      const apiKey = getActiveApiKey();
+      if (!apiKey) {
+        const bestOverlap = Math.max(
+          wordOverlapRatio(userText, question.en),
+          ...(question.accepts || []).map(c => wordOverlapRatio(userText, c))
+        );
+        return {
+          isCorrect: bestOverlap >= 0.65,
+          advice: question.advice,
+          source: "local"
+        };
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+      try {
+        const prompt = `英語スピーキング判定。お題「${state.currentTopic.title}」。
+日本語: ${question.jp}
+模範解答: ${question.en}
+学習者の発話: ${userText}
+意味が通じて自然な英語（多少の口語・言い換えOK）ならtrue。厳格なスペル・句読点は不問。
+JSONのみで返答: {"ok":true|false,"tip":"日本語で45文字以内の短いアドバイス"}`;
+
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            signal: controller.signal,
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                responseMimeType: "application/json",
+                temperature: 0.1,
+                maxOutputTokens: 120,
+                thinkingConfig: { thinkingBudget: 0 }
+              }
+            })
+          }
+        );
+
+        if (!res.ok) throw new Error("API status " + res.status);
+        const data = await res.json();
+        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        const parsed = JSON.parse(rawText);
+        return {
+          isCorrect: Boolean(parsed.ok),
+          advice: parsed.tip || question.advice,
+          source: "ai"
+        };
+      } catch (e) {
+        // タイムアウト・通信エラー時はローカル判定へ即フォールバック
+        const bestOverlap = Math.max(
+          wordOverlapRatio(userText, question.en),
+          ...(question.accepts || []).map(c => wordOverlapRatio(userText, c))
+        );
+        return {
+          isCorrect: bestOverlap >= 0.65,
+          advice: question.advice,
+          source: "local"
+        };
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
+
+    // =========================================================================
+    // 10. AIお題生成 ＆ Stage 2 イラスト先読み生成
+    // =========================================================================
+    async function generateNewTopicWithAI(customPrompt = "") {
+      const apiKey = getActiveApiKey();
+      if (!apiKey) {
+        showToast("AIでお題を作るには右上の「⚙️ 設定」からAPIキーを登録してね！", "warning");
+        openSettingsModal();
+        return;
+      }
+
+      el.btnGenerateTopic.disabled = true;
+      el.genTopicIcon.textContent = "⏳";
+      el.genTopicText.textContent = "お題を作成中...";
+
+      try {
+        const userTheme = customPrompt.trim()
+          ? `リクエストされたテーマ・文法：「${customPrompt.trim()}」`
+          : `日常英会話でよく使う実用的な文法パターンまたはシチュエーションを1つランダムに選ぶ（want to / Could you / thinking about / It takes / used to 以外の表現）`;
+
+        const prompt = `日本人向けの英会話アウトプット練習アプリのお題セットを1つ作成してください。
+${userTheme}
+
+以下のJSON形式で厳密に出力してください（全5問）:
+{
+  "title": "英語パターンまたは短いお題タイトル（例：have to ～）",
+  "level": "レベルまたはカテゴリ（例：日常の義務）",
+  "subtitle": "短いキャッチコピー",
+  "description": "このお題の使いどころとコツ（日本語80文字以内）",
+  "questions": [
+    {
+      "jp": "自然な短めの日本語文",
+      "en": "自然な模範英文（短め・口語的）",
+      "accepts": ["自然な別解1", "自然な別解2"],
+      "cue": "イラストや情景の日本語ヒント（30文字以内、英語は書かない）",
+      "emoji": "情景を表す絵文字2つ",
+      "promptEn": "この英文で返答したくなるような相手からの自然な英語の質問文",
+      "promptJp": "相手の質問の日本語訳",
+      "altExpr": "ネイティブが使う別の自然な言い回し（英語1〜2例）",
+      "advice": "日本語でのワンポイントアドバイス（60文字以内）",
+      "imagePrompt": "A warm Japanese English textbook style flat editorial illustration, clean lines, soft pastel colors, NO TEXT, NO LETTERS, NO NUMBERS. [英語での具体的な情景描写]"
+    }
+  ]
+}`;
+
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                responseMimeType: "application/json",
+                temperature: 0.8
+              }
+            })
+          }
+        );
+
+        if (!res.ok) throw new Error("API error " + res.status);
+        const data = await res.json();
+        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        const parsed = JSON.parse(rawText);
+
+        if (!parsed.title || !Array.isArray(parsed.questions) || parsed.questions.length < 3) {
+          throw new Error("Invalid topic format");
+        }
+
+        const newTopic = {
+          id: "ai-" + Date.now(),
+          title: parsed.title,
+          level: parsed.level || "AIカスタムお題",
+          subtitle: parsed.subtitle || "AIが作成したオリジナル練習セット",
+          description: parsed.description || "AIがあなたのために作成した実践フレーズ5問セットだよ！",
+          questions: parsed.questions.slice(0, 5)
+        };
+
+        state.currentTopic = newTopic;
+        resetBackgroundImagesForTopic(newTopic);
+        el.aiTopicInput.value = "";
+        renderHome();
+        showScreen("home");
+        showToast(`✨ 新しいお題「${newTopic.title}」を作成したよ！`, "success");
+      } catch (e) {
+        showToast("お題の作成に失敗しました。APIキーや通信状況を確認してね。", "error");
+      } finally {
+        el.btnGenerateTopic.disabled = false;
+        el.genTopicIcon.textContent = "✨";
+        el.genTopicText.textContent = "AIで新しいお題を作る";
+      }
+    }
+
+    /** 画像生成API呼び出し（Imagen 3） */
+    async function generateIllustrationUrl(imagePrompt) {
+      const apiKey = getActiveApiKey();
+      if (!apiKey) return null;
+
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${encodeURIComponent(apiKey)}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              instances: [{ prompt: imagePrompt }],
+              parameters: { sampleCount: 1, aspectRatio: "4:3" }
+            })
+          }
+        );
+        if (!res.ok) throw new Error("Imagen status " + res.status);
+        const data = await res.json();
+        const b64 = data?.predictions?.[0]?.bytesBase64Encoded;
+        if (!b64) return null;
+        return `data:image/png;base64,${b64}`;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function resetBackgroundImagesForTopic(topic) {
+      state.bgGenRunId += 1;
+      state.bgImages = {};
+      (topic.questions || []).forEach((_, idx) => {
+        state.bgImages[idx] = { status: "idle", url: null };
+      });
+      updateBgGenPill();
+    }
+
+    function updateBgGenPill() {
+      const total = state.currentTopic.questions.length;
+      if (!state.illustrationEnabled || !getActiveApiKey()) {
+        el.bgGenPill.classList.add("hidden");
+        el.bgGenPill.classList.remove("flex");
+        return;
+      }
+
+      let doneCount = 0;
+      let loadingCount = 0;
+      for (let i = 0; i < total; i++) {
+        const st = state.bgImages[i]?.status;
+        if (st === "done") doneCount++;
+        if (st === "loading") loadingCount++;
+      }
+
+      if (loadingCount === 0 && doneCount === 0) {
+        el.bgGenPill.classList.add("hidden");
+        el.bgGenPill.classList.remove("flex");
+        return;
+      }
+
+      el.bgGenPill.classList.remove("hidden");
+      el.bgGenPill.classList.add("flex");
+
+      if (doneCount === total) {
+        el.bgGenPill.className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-bold border shadow-sm bg-emerald-50 border-emerald-200 text-emerald-700";
+        el.bgGenDot.className = "w-2 h-2 rounded-full bg-emerald-500";
+        el.bgGenText.textContent = "Stage 2準備OK!";
+      } else {
+        el.bgGenPill.className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-bold border shadow-sm bg-indigo-50 border-indigo-200 text-indigo-700";
+        el.bgGenDot.className = "w-2 h-2 rounded-full bg-indigo-500 animate-pulse";
+        el.bgGenText.textContent = `Stage 2準備中 ${doneCount}/${total}`;
+      }
+
+      if (state.phase === "transition" && state.nextTransitionTarget === 2) {
+        renderTransitionIllustrationStatus();
+      }
+    }
+
+    async function startBackgroundImagePreload() {
+      if (!state.illustrationEnabled || !getActiveApiKey()) {
+        updateBgGenPill();
+        return;
+      }
+      const runId = state.bgGenRunId;
+      const questions = state.currentTopic.questions;
+
+      for (let i = 0; i < questions.length; i++) {
+        if (runId !== state.bgGenRunId || !state.illustrationEnabled) return;
+        if (state.bgImages[i]?.status === "done" || state.bgImages[i]?.status === "loading") continue;
+
+        state.bgImages[i] = { status: "loading", url: null };
+        updateBgGenPill();
+
+        const url = await generateIllustrationUrl(questions[i].imagePrompt);
+        if (runId !== state.bgGenRunId) return;
+
+        if (url) {
+          state.bgImages[i] = { status: "done", url };
+        } else {
+          state.bgImages[i] = { status: "error", url: null };
+        }
+        updateBgGenPill();
+
+        if (state.phase === "training" && state.stage === 2 && state.currentQuestionIdx === i) {
+          renderStage2Visual(i);
+        }
+      }
+    }
+
+    async function regenerateSingleIllustration(qIdx) {
+      if (!state.illustrationEnabled) {
+        showToast("イラスト生成がOFFになっています（設定からONにできます）", "info");
+        return;
+      }
+      if (!getActiveApiKey()) {
+        showToast("イラストを描くには「⚙️ 設定」からAPIキーを登録してね！", "warning");
+        return;
+      }
+      const q = state.currentTopic.questions[qIdx];
+      if (!q) return;
+
+      state.bgImages[qIdx] = { status: "loading", url: null };
+      updateBgGenPill();
+      if (state.phase === "training" && state.stage === 2 && state.currentQuestionIdx === qIdx) {
+        renderStage2Visual(qIdx);
+      }
+
+      const variedPrompt = `${q.imagePrompt} Fresh composition, expressive storytelling, bright inviting lighting.`;
+      const url = await generateIllustrationUrl(variedPrompt);
+      state.bgImages[qIdx] = url ? { status: "done", url } : { status: "error", url: null };
+      updateBgGenPill();
+
+      if (state.phase === "training" && state.stage === 2 && state.currentQuestionIdx === qIdx) {
+        renderStage2Visual(qIdx);
+      }
+      if (state.phase === "summary") {
+        renderSummaryList();
+      }
+      showToast(url ? "🎨 イラストを描き直したよ！" : "イラストの生成に失敗しました（情景カードを表示中）", url ? "success" : "warning");
+    }
+
+    /** Stage 2 ビジュアル描画（AIイラスト or 無料情景イメージカード） */
+    function renderStage2Visual(qIdx) {
+      const q = state.currentTopic.questions[qIdx];
+      const imgInfo = state.bgImages[qIdx] || { status: "idle", url: null };
+
+      el.btnRegenCurrentImg.classList.toggle("hidden", !state.illustrationEnabled);
+
+      if (state.illustrationEnabled && imgInfo.status === "done" && imgInfo.url) {
+        el.questionImageBox.innerHTML = `<img src="${imgInfo.url}" alt="Situation illustration" class="w-full h-full object-cover animate-fade-up" />`;
+        return;
+      }
+
+      if (state.illustrationEnabled && imgInfo.status === "loading") {
+        el.questionImageBox.innerHTML = `
+          <div class="w-full h-full flex flex-col items-center justify-center gap-3 p-6 bg-gradient-to-br from-indigo-50 to-emerald-50 text-center">
+            <div class="w-9 h-9 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+            <div class="text-xs font-extrabold text-indigo-700">🎨 イラストを描いています...</div>
+            <div class="text-sm font-bold text-slate-700 max-w-xs">${q.emoji || "✨"} ${q.cue || "情景をイメージしよう"}</div>
+          </div>`;
+        return;
+      }
+
+      // 無料・高速「情景イメージカード」
+      el.questionImageBox.innerHTML = `
+        <div class="w-full h-full flex flex-col items-center justify-center gap-3 p-6 bg-gradient-to-br from-indigo-50 via-white to-emerald-50 text-center">
+          <span class="px-2.5 py-1 rounded-full bg-white/90 border border-indigo-100 text-[10px] font-extrabold text-indigo-600 shadow-sm">
+            ${state.illustrationEnabled ? "情景イメージカード" : "⚡ 情景イメージカード（イラストOFF）"}
+          </span>
+          <div class="text-5xl sm:text-6xl leading-none py-1 select-none">${q.emoji || "💭✨"}</div>
+          <p class="text-sm sm:text-base font-extrabold text-slate-800 max-w-md leading-relaxed">${q.cue || "このシチュエーションを英語で表現しよう！"}</p>
+          <p class="text-[11px] font-bold text-slate-400">お題パターン：${state.currentTopic.title}</p>
+        </div>`;
+    }
+
+    // =========================================================================
+    // 11. 音声認識（Web Speech API）＆ タイマー制御
+    // =========================================================================
+    const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+
+    function initSpeechRecognition() {
+      if (!SpeechRecognitionClass) {
+        el.homeMicWarning.classList.remove("hidden");
+        return;
+      }
+      recognition = new SpeechRecognitionClass();
+      recognition.lang = "en-US";
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onstart = () => {
+        state.isListening = true;
+        updateMicUI(true);
+      };
+
+      recognition.onresult = (event) => {
+        if (state.isEvaluating) return;
+        let finalStr = "";
+        let interimStr = "";
+        for (let i = 0; i < event.results.length; i++) {
+          const t = event.results[i][0].transcript;
+          if (event.results[i].isFinal) finalStr += t + " ";
+          else interimStr += t;
+        }
+        const combined = (finalStr + interimStr).trim();
+        if (!combined) return;
+
+        state.latestTranscript = combined;
+        state.hasSpokenThisTurn = true;
+        el.transcriptDisplay.textContent = combined;
+        el.transcriptDisplay.className = "text-base sm:text-lg font-extrabold text-slate-900";
+        el.btnEvalNow.classList.remove("hidden");
+
+        // 話し始めたらタイマー一時停止
+        if (state.pauseOnSpeech && state.timerInterval) {
+          stopTimer();
+          el.timerStatusText.textContent = "発話中（停止）";
+        }
+
+        // 0.05秒ファストパス：発話途中で模範解答に完全一致したら即正解！
+        const quick = fastLocalEvaluate(combined, state.currentQuestion, false);
+        if (quick.decided && quick.isCorrect) {
+          clearSilenceTimeout();
+          submitUserAnswer(combined, quick);
+          return;
+        }
+
+        // 無音0.8秒で自動確定
+        clearSilenceTimeout();
+        state.silenceTimeout = setTimeout(() => {
+          if (state.isListening && state.latestTranscript && !state.isEvaluating) {
+            submitUserAnswer(state.latestTranscript);
+          }
+        }, 850);
+      };
+
+      recognition.onerror = (e) => {
+        if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+          showToast("マイクの使用が許可されていません。ブラウザの設定を確認するか下の入力欄を使ってね。", "warning");
+        }
+        state.isListening = false;
+        updateMicUI(false);
+      };
+
+      recognition.onend = () => {
+        state.isListening = false;
+        updateMicUI(false);
+      };
+    }
+
+    function clearSilenceTimeout() {
+      if (state.silenceTimeout) {
+        clearTimeout(state.silenceTimeout);
+        state.silenceTimeout = null;
+      }
+    }
+
+    function clearPromptFallbackTimer() {
+      if (state.promptFallbackTimer) {
+        clearTimeout(state.promptFallbackTimer);
+        state.promptFallbackTimer = null;
+      }
+    }
+
+    function startListening() {
+      if (!recognition || state.isEvaluating) return;
+      try {
+        recognition.start();
+      } catch (e) {}
+    }
+
+    function stopListening() {
+      clearSilenceTimeout();
+      if (recognition && state.isListening) {
+        try { recognition.stop(); } catch (e) {}
+      }
+      state.isListening = false;
+      updateMicUI(false);
+    }
+
+    function updateMicUI(listening) {
+      if (listening) {
+        el.micPulseRing.classList.remove("hidden");
+        el.btnMic.className = "relative z-10 w-20 h-20 rounded-full bg-gradient-to-br from-rose-500 to-rose-600 hover:brightness-110 active:scale-95 text-white shadow-lg shadow-rose-300/70 flex items-center justify-center transition";
+        el.micStatusLabel.textContent = "🎙️ 聞き取り中... 話し終わると自動判定！";
+        el.micStatusLabel.className = "text-xs font-extrabold text-rose-600";
+      } else {
+        el.micPulseRing.classList.add("hidden");
+        el.btnMic.className = "relative z-10 w-20 h-20 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-700 hover:brightness-110 active:scale-95 text-white shadow-lg shadow-indigo-300/60 flex items-center justify-center transition";
+        el.micStatusLabel.textContent = "タップしてマイクON";
+        el.micStatusLabel.className = "text-xs font-extrabold text-slate-500";
+      }
+    }
+
+    function startTimer() {
+      stopTimer();
+      if (state.timerSeconds <= 0) {
+        el.timerContainer.classList.add("opacity-40");
+        el.timerText.textContent = "∞";
+        el.timerStatusText.textContent = "制限なし";
+        el.timerRing.style.strokeDashoffset = "0";
+        el.timerRing.style.stroke = "#94a3b8";
+        return;
+      }
+
+      el.timerContainer.classList.remove("opacity-40");
+      state.timerTotalMs = state.timerSeconds * 1000;
+      state.timerRemainingMs = state.timerTotalMs;
+      state.lastTickSec = state.timerSeconds;
+      el.timerStatusText.textContent = "制限時間";
+      updateTimerVisual();
+
+      const startAt = Date.now();
+      state.timerInterval = setInterval(() => {
+        const elapsed = Date.now() - startAt;
+        state.timerRemainingMs = Math.max(0, state.timerTotalMs - elapsed);
+        updateTimerVisual();
+
+        const secCeil = Math.ceil(state.timerRemainingMs / 1000);
+        if (secCeil <= 3 && secCeil > 0 && secCeil !== state.lastTickSec) {
+          state.lastTickSec = secCeil;
+          playTickSound();
+        }
+
+        if (state.timerRemainingMs <= 0) {
+          stopTimer();
+          if (!state.isEvaluating) {
+            submitUserAnswer(state.latestTranscript || "", null, true);
+          }
+        }
+      }, 100);
+    }
+
+    function stopTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+    }
+
+    function updateTimerVisual() {
+      const circumference = 125.66;
+      const ratio = state.timerTotalMs > 0 ? state.timerRemainingMs / state.timerTotalMs : 1;
+      el.timerRing.style.strokeDashoffset = String(circumference * (1 - ratio));
+      const sec = Math.ceil(state.timerRemainingMs / 1000);
+      el.timerText.textContent = String(sec);
+
+      if (sec <= 3) {
+        el.timerRing.style.stroke = "#e11d48";
+        el.timerText.className = "absolute text-sm font-extrabold text-rose-600";
+      } else {
+        el.timerRing.style.stroke = "#4f46e5";
+        el.timerText.className = "absolute text-sm font-extrabold text-slate-800";
+      }
+    }
+
+    // =========================================================================
+    // 12. ホーム画面レンダリング
+    // =========================================================================
+    function renderHome() {
+      el.statStreak.textContent = String(state.stats.streak);
+      el.statTotalSets.textContent = String(state.stats.totalClearedSets);
+
+      const t = state.currentTopic;
+      el.homeTopicLevel.textContent = t.level || "基本パターン";
+      el.homeTopicTitle.textContent = t.title;
+      el.homeTopicDesc.textContent = t.description || t.subtitle || "";
+
+      el.presetTopicsList.innerHTML = "";
+      PRESET_TOPICS.forEach(preset => {
+        const active = state.currentTopic.id === preset.id;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = active
+          ? "px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-600 text-white shadow-sm transition"
+          : "px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 transition";
+        btn.textContent = preset.title;
+        btn.addEventListener("click", () => {
+          state.currentTopic = preset;
+          resetBackgroundImagesForTopic(preset);
+          renderHome();
+        });
+        el.presetTopicsList.appendChild(btn);
+      });
+
+      syncSettingsUI();
+      updateHistoryBadge();
+    }
+
+    function goHome() {
+      clearPromptFallbackTimer();
+      stopListening();
+      stopTimer();
+      if ("speechSynthesis" in window) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+      }
+      state.phase = "home";
+      renderHome();
+      showScreen("home");
+    }
+
+    // =========================================================================
+    // 13. トレーニング進行（Stage 1 → Stage 2 → Stage 3 → Summary）
+    // =========================================================================
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function startNewSession() {
+      getAudioCtx();
+      state.sessionStartTime = Date.now();
+      state.sessionAttempts = 0;
+      state.sessionCorrects = 0;
+      startBackgroundImagePreload();
+      startStage(1);
+    }
+
+    function startStage(stageNum) {
+      state.phase = "training";
+      state.stage = stageNum;
+      state.isRetryRound = false;
+      state.clearedIndices = new Set();
+      state.retryQueue = [];
+
+      const indices = state.currentTopic.questions.map((_, i) => i);
+      state.queue = stageNum === 1 ? indices : shuffleArray(indices);
+
+      el.trainTopicLabel.textContent = state.currentTopic.title;
+      if (stageNum === 1) {
+        el.trainStageBadge.textContent = "Stage 1：瞬間英作文";
+        el.trainStageBadge.className = "px-2.5 py-1 rounded-full text-xs font-extrabold bg-indigo-100 text-indigo-700";
+      } else if (stageNum === 2) {
+        el.trainStageBadge.textContent = "Stage 2：イメージ直結";
+        el.trainStageBadge.className = "px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-700";
+      } else {
+        el.trainStageBadge.textContent = "Stage 3：ディスカッション";
+        el.trainStageBadge.className = "px-2.5 py-1 rounded-full text-xs font-extrabold bg-violet-100 text-violet-700";
+      }
+
+      showScreen("training");
+      loadNextQuestion();
+    }
+
+    function updateProgressUI() {
+      const total = state.currentTopic.questions.length;
+      const cleared = state.clearedIndices.size;
+      const pct = Math.round((cleared / total) * 100);
+      el.trainProgressBar.style.width = `${pct}%`;
+      el.trainProgressText.textContent = `クリア ${cleared} / ${total}`;
+      el.trainLoopBadge.classList.toggle("hidden", !state.isRetryRound);
+    }
+
+    function loadNextQuestion() {
+      clearPromptFallbackTimer();
+      stopListening();
+      stopTimer();
+
+      if (state.queue.length === 0) {
+        if (state.retryQueue.length > 0) {
+          state.queue = shuffleArray(state.retryQueue);
+          state.retryQueue = [];
+          state.isRetryRound = true;
+          showToast("🔥 間違えた問題だけリベンジするよ！", "info");
+        } else {
+          onStageComplete();
+          return;
+        }
+      }
+
+      state.currentQuestionIdx = state.queue.shift();
+      state.currentQuestion = state.currentTopic.questions[state.currentQuestionIdx];
+      state.latestTranscript = "";
+      state.hasSpokenThisTurn = false;
+      state.isEvaluating = false;
+
+      updateProgressUI();
+      el.questionNumberBadge.textContent = `Q${state.currentQuestionIdx + 1}`;
+
+      // エリア表示切替
+      el.inputArea.classList.remove("hidden");
+      el.evaluatingArea.classList.add("hidden");
+      el.resultArea.classList.add("hidden");
+      el.btnEvalNow.classList.add("hidden");
+      el.keyboardInput.value = "";
+      el.transcriptDisplay.textContent = "マイクに向かって英語で話してください...";
+      el.transcriptDisplay.className = "text-base sm:text-lg font-bold text-slate-400";
+
+      el.stage1PromptArea.classList.toggle("hidden", state.stage !== 1);
+      el.stage2PromptArea.classList.toggle("hidden", state.stage !== 2);
+      el.stage3PromptArea.classList.toggle("hidden", state.stage !== 3);
+
+      if (state.stage === 1) {
+        el.questionJp.textContent = state.currentQuestion.jp;
+        startTimer();
+        startListening();
+      } else if (state.stage === 2) {
+        el.cueHintBox.classList.add("hidden");
+        el.jpHintBox.classList.add("hidden");
+        renderStage2Visual(state.currentQuestionIdx);
+        startTimer();
+        startListening();
+      } else {
+        // Stage 3：音声リスニング → 終了後にタイマー＆マイク起動
+        el.stage3PromptHintBox.classList.add("hidden");
+        syncSpeedButtonsUI();
+        playStage3AudioPrompt(true);
+      }
+    }
+
+    function playStage3AudioPrompt(autoStartMic = false) {
+      const q = state.currentQuestion;
+      if (!q) return;
+      const promptText = q.promptEn || "Could you say that in English?";
+
+      clearPromptFallbackTimer();
+      stopListening();
+      if (autoStartMic) stopTimer();
+
+      el.stage3SpeakerPulse.classList.remove("hidden");
+      el.stage3ListenStatus.textContent = "🎧 相手が英語で質問中...";
+
+      let started = false;
+      const afterSpeak = () => {
+        if (started) return;
+        started = true;
+        clearPromptFallbackTimer();
+        el.stage3SpeakerPulse.classList.add("hidden");
+        el.stage3ListenStatus.textContent = "🎙️ 今すぐ英語で返答しよう！";
+        if (autoStartMic && state.phase === "training" && state.stage === 3 && !state.isEvaluating && el.resultArea.classList.contains("hidden")) {
+          startTimer();
+          startListening();
+        }
+      };
+
+      // SpeechSynthesisのonendが発火しない端末向けフォールバック
+      state.promptFallbackTimer = setTimeout(afterSpeak, 4500);
+      speakEnglish(promptText, afterSpeak);
+    }
+
+    async function submitUserAnswer(rawText, preEvaluated = null, isTimeout = false) {
+      if (state.isEvaluating) return;
+      state.isEvaluating = true;
+      clearPromptFallbackTimer();
+      stopListening();
+      stopTimer();
+
+      const userText = (rawText || "").trim();
+      const q = state.currentQuestion;
+      state.sessionAttempts += 1;
+
+      // 1. 事前判定 or ローカル即判定（0.05秒）
+      let result = preEvaluated;
+      if (!result) {
+        const localRes = fastLocalEvaluate(userText, q, true);
+        if (localRes.decided) {
+          result = localRes;
+        }
+      }
+
+      // 2. グレーゾーンのみAI超軽量判定
+      if (!result) {
+        el.inputArea.classList.add("hidden");
+        el.evaluatingArea.classList.remove("hidden");
+        result = await evaluateAnswerWithUltraLightAI(userText, q);
+      }
+
+      showEvaluationResult(userText, result, isTimeout);
+    }
+
+    function showEvaluationResult(userText, result, isTimeout = false) {
+      const q = state.currentQuestion;
+      el.inputArea.classList.add("hidden");
+      el.evaluatingArea.classList.add("hidden");
+      el.resultArea.classList.remove("hidden");
+
+      if (result.isCorrect) {
+        state.sessionCorrects += 1;
+        state.clearedIndices.add(state.currentQuestionIdx);
+        playCorrectSound();
+
+        el.resultBanner.className = "rounded-2xl p-4 flex items-center justify-between gap-3 border bg-emerald-50 border-emerald-200 text-emerald-900";
+        el.resultIcon.textContent = "🎉";
+        el.resultTitle.textContent = "ピンポーン！正解！";
+        el.resultSubtitle.textContent = "素晴らしい瞬発力！この調子でいこう！";
+      } else {
+        if (!state.retryQueue.includes(state.currentQuestionIdx)) {
+          state.retryQueue.push(state.currentQuestionIdx);
+        }
+        playIncorrectSound();
+
+        el.resultBanner.className = "rounded-2xl p-4 flex items-center justify-between gap-3 border bg-rose-50 border-rose-200 text-rose-900";
+        el.resultIcon.textContent = isTimeout ? "⏰" : "💪";
+        el.resultTitle.textContent = isTimeout ? "タイムアップ！もう一回チャレンジ" : "おしい！あと一歩！";
+        el.resultSubtitle.textContent = "音声を聞いて口になじませよう（あとでリベンジ出題されるよ）";
+      }
+
+      el.resultSpeedBadge.textContent = result.source === "ai" ? "✨ AI柔軟判定" : "⚡ 0.05秒即判定";
+      el.resultUserText.textContent = userText || "（音声なし・パス）";
+      el.resultCorrectEn.textContent = q.en;
+      el.resultJp.textContent = q.jp;
+      el.resultAdvice.textContent = result.advice || q.advice || "";
+
+      // Stage 3：相手の質問を表示
+      if (state.stage === 3 && q.promptEn) {
+        el.resultStage3PromptBox.classList.remove("hidden");
+        el.resultPromptEn.textContent = q.promptEn;
+        el.resultPromptJp.textContent = q.promptJp || "";
+      } else {
+        el.resultStage3PromptBox.classList.add("hidden");
+      }
+
+      // 別の言い回し表示
+      if (q.altExpr) {
+        el.resultAltBox.classList.remove("hidden");
+        el.resultAltText.textContent = q.altExpr;
+      } else {
+        el.resultAltBox.classList.add("hidden");
+      }
+
+      updateProgressUI();
+      syncSpeedButtonsUI();
+
+      // 次ボタンの文言
+      const remainingAll = state.queue.length + state.retryQueue.length;
+      if (remainingAll === 0) {
+        if (state.stage === 1) el.btnNextText.textContent = "Stage 1 クリア！次へ進む";
+        else if (state.stage === 2) el.btnNextText.textContent = "Stage 2 クリア！次へ進む";
+        else el.btnNextText.textContent = "全ステージ完了！結果を見る";
+      } else {
+        el.btnNextText.textContent = "次の問題へ";
+      }
+    }
+
+    function onStageComplete() {
+      stopListening();
+      stopTimer();
+      playFanfareSound();
+
+      if (state.stage === 1) {
+        state.phase = "transition";
+        state.nextTransitionTarget = 2;
+        el.transHeroIcon.textContent = "🎉";
+        el.transBadge.textContent = "STAGE 1 CLEAR!";
+        el.transTitle.textContent = "瞬間英作文を全問クリア！";
+        el.transDesc.innerHTML = "次は <strong>Stage 2（イメージ直結モード）</strong>！<br />日本語を消して、シャッフルされたイラストだけを見て英語を口から出そう！";
+        el.transIllustPanel.classList.remove("hidden");
+        el.transStage3Panel.classList.add("hidden");
+        el.btnStartNextIcon.textContent = "🎨";
+        el.btnStartNextLabel.textContent = "Stage 2（イメージ直結）へ進む！";
+        renderTransitionIllustrationStatus();
+        showScreen("transition");
+      } else if (state.stage === 2) {
+        state.phase = "transition";
+        state.nextTransitionTarget = 3;
+        el.transHeroIcon.textContent = "🔥";
+        el.transBadge.textContent = "STAGE 2 CLEAR!";
+        el.transTitle.textContent = "イメージ直結モードを突破！";
+        el.transDesc.innerHTML = "いよいよ最終関門 <strong>Stage 3（ディスカッション）</strong>！<br />相手の英語の質問を耳で聞いて、反射的に英語で返そう！";
+        el.transIllustPanel.classList.add("hidden");
+        el.transStage3Panel.classList.remove("hidden");
+        el.btnStartNextIcon.textContent = "🎧";
+        el.btnStartNextLabel.textContent = "Stage 3（ディスカッション）へ進む！";
+        showScreen("transition");
+      } else {
+        finishAllStages();
+      }
+    }
+
+    function renderTransitionIllustrationStatus() {
+      const qs = state.currentTopic.questions;
+      const total = qs.length;
+
+      if (!state.illustrationEnabled || !getActiveApiKey()) {
+        el.transImgStatus.textContent = "⚡ 情景イメージカードの準備完了！（待ち時間ゼロ）";
+        el.transImgCount.textContent = `${total} / ${total}`;
+        el.transImgBar.style.width = "100%";
+        el.transReadyHint.classList.add("hidden");
+        el.transImgGrid.innerHTML = qs.map(q => `
+          <div class="aspect-square rounded-xl bg-white border border-emerald-200 flex items-center justify-center text-xl shadow-sm">
+            ${q.emoji ? q.emoji.slice(0, 2) : "✨"}
+          </div>
+        `).join("");
+        return;
+      }
+
+      let done = 0;
+      el.transImgGrid.innerHTML = "";
+      qs.forEach((q, idx) => {
+        const info = state.bgImages[idx] || { status: "idle", url: null };
+        if (info.status === "done") done++;
+        const cell = document.createElement("div");
+        cell.className = "aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white flex items-center justify-center";
+        if (info.status === "done" && info.url) {
+          cell.innerHTML = `<img src="${info.url}" alt="Q${idx + 1}" class="w-full h-full object-cover" />`;
+        } else if (info.status === "loading") {
+          cell.innerHTML = `<div class="w-5 h-5 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>`;
+        } else {
+          cell.innerHTML = `<span class="text-base">${q.emoji ? q.emoji.slice(0, 2) : "🎨"}</span>`;
+        }
+        el.transImgGrid.appendChild(cell);
+      });
+
+      const pct = Math.max(12, Math.round((done / total) * 100));
+      el.transImgBar.style.width = `${pct}%`;
+      el.transImgCount.textContent = `${done} / ${total}`;
+      el.transImgStatus.textContent = done === total ? "✅ 全5問のイラスト準備完了！" : "🎨 イラストを裏側で仕上げ中...";
+      el.transReadyHint.classList.toggle("hidden", done === total);
+    }
+
+    function finishAllStages() {
+      state.phase = "summary";
+      recordDailyClear();
+
+      const elapsedSec = Math.max(1, Math.round((Date.now() - state.sessionStartTime) / 1000));
+      const mins = Math.floor(elapsedSec / 60);
+      const secs = String(elapsedSec % 60).padStart(2, "0");
       const acc = state.sessionAttempts > 0
         ? Math.round((state.sessionCorrects / state.sessionAttempts) * 100)
         : 100;
@@ -918,7 +2803,39 @@
       showScreen("summary");
     }
 
-    /** 学習記録・復習画面を開く */
+    function renderSummaryList() {
+      el.summaryPhraseList.innerHTML = "";
+      state.currentTopic.questions.forEach((q, idx) => {
+        const imgInfo = state.bgImages[idx];
+        const hasImg = state.illustrationEnabled && imgInfo && imgInfo.status === "done" && imgInfo.url;
+
+        const row = document.createElement("div");
+        row.className = "p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center gap-3";
+        row.innerHTML = `
+          <div class="w-12 h-12 rounded-xl overflow-hidden bg-white border border-slate-200 flex items-center justify-center text-xl shrink-0">
+            ${hasImg ? `<img src="${imgInfo.url}" alt="Q${idx + 1}" class="w-full h-full object-cover" />` : (q.emoji || "💬")}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-extrabold text-slate-900 leading-snug">${q.en}</div>
+            <div class="text-xs text-slate-500 mt-0.5">${q.jp}</div>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            ${state.illustrationEnabled ? `<button class="sum-regen-btn p-2 rounded-xl bg-white hover:bg-amber-50 border border-slate-200 text-slate-500 hover:text-amber-700 text-xs transition" title="イラストを描き直す">🔄</button>` : ""}
+            <button class="sum-play-btn px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-sm transition">🔊</button>
+          </div>
+        `;
+        row.querySelector(".sum-play-btn").addEventListener("click", () => speakEnglish(q.en));
+        const regenBtn = row.querySelector(".sum-regen-btn");
+        if (regenBtn) {
+          regenBtn.addEventListener("click", () => regenerateSingleIllustration(idx));
+        }
+        el.summaryPhraseList.appendChild(row);
+      });
+    }
+
+    // =========================================================================
+    // 14. 学習記録・復習画面（v7）
+    // =========================================================================
     function openHistoryScreen() {
       clearPromptFallbackTimer();
       stopListening();
@@ -931,10 +2848,8 @@
       showScreen("history");
     }
 
-    /** 履歴から選んだお題をロードして復習トレーニングを即スタート */
     function startReviewFromHistory(topicData, startStageNum = 1) {
       getAudioCtx();
-      // 履歴からディープコピーしてお題をセット
       state.currentTopic = JSON.parse(JSON.stringify(topicData));
       resetBackgroundImagesForTopic(state.currentTopic);
       state.sessionStartTime = Date.now();
@@ -948,7 +2863,6 @@
       startStage(startStageNum);
     }
 
-    /** 学習記録・復習リストを描画 */
     function renderHistoryScreen() {
       el.historyStatTopics.textContent = String(state.history.length);
       el.historyStatSets.textContent = String(state.stats.totalClearedSets);
@@ -989,7 +2903,6 @@
             <span>⏱ タイム: <strong class="text-slate-800">${mins}:${secs}</strong></span>
           </div>
 
-          <!-- 復習スタートボタン群 -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <button class="hist-review-all-btn py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-emerald-600 hover:brightness-110 text-white text-xs font-extrabold shadow-sm transition flex items-center justify-center gap-1.5">
               <span>🔁</span>
@@ -1001,7 +2914,6 @@
             </button>
           </div>
 
-          <!-- フレーズ一覧アコーディオン -->
           <div class="pt-1 border-t border-slate-100">
             <button class="hist-toggle-phrases-btn w-full py-1.5 flex items-center justify-between text-xs font-extrabold text-slate-500 hover:text-indigo-600 transition">
               <span>📋 学習した5フレーズを見返す</span>
@@ -1021,7 +2933,6 @@
           </div>
         `;
 
-        // イベント紐付け
         card.querySelector(".hist-review-all-btn").addEventListener("click", () => startReviewFromHistory(topic, 1));
         card.querySelector(".hist-review-s3-btn").addEventListener("click", () => startReviewFromHistory(topic, 3));
 
@@ -1038,7 +2949,7 @@
           btn.addEventListener("click", () => speakEnglish(btn.dataset.en));
         });
 
-        // 削除ボタン（confirm禁止のため2タップ確認式）
+        // 2タップ確認式削除（confirm不使用）
         const delBtn = card.querySelector(".hist-delete-btn");
         let deleteArmed = false;
         delBtn.addEventListener("click", () => {
@@ -1065,7 +2976,51 @@
         el.historyList.appendChild(card);
       });
     }
-// ... existing code ... -->
+
+    // =========================================================================
+    // 15. APIキー接続テスト
+    // =========================================================================
+    async function testApiKeyConnection() {
+      const key = el.inputApiKey.value.trim() || getActiveApiKey();
+      if (!key) {
+        el.apikeyTestResult.textContent = "⚠️ テストするAPIキーを入力してください。";
+        el.apikeyTestResult.className = "rounded-xl p-2.5 text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200";
+        el.apikeyTestResult.classList.remove("hidden");
+        return;
+      }
+
+      el.btnTestApikey.disabled = true;
+      el.btnTestApikeyLabel.textContent = "テスト中...";
+      el.apikeyTestResult.classList.add("hidden");
+
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: "Reply with OK only." }] }],
+              generationConfig: { maxOutputTokens: 10 }
+            })
+          }
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        el.apikeyTestResult.textContent = "✅ 接続成功！Gemini AIが正常に使える状態です。";
+        el.apikeyTestResult.className = "rounded-xl p-2.5 text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200";
+      } catch (e) {
+        el.apikeyTestResult.textContent = `❌ 接続に失敗しました（${e.message}）。キーが正しいか確認してください。`;
+        el.apikeyTestResult.className = "rounded-xl p-2.5 text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200";
+      } finally {
+        el.apikeyTestResult.classList.remove("hidden");
+        el.btnTestApikey.disabled = false;
+        el.btnTestApikeyLabel.textContent = "接続テスト";
+      }
+    }
+
+    // =========================================================================
+    // 16. イベントリスナー登録
+    // =========================================================================
     el.btnHeaderHome.addEventListener("click", goHome);
     el.btnSummaryHome.addEventListener("click", goHome);
     el.btnOpenHistory.addEventListener("click", openHistoryScreen);
@@ -1075,9 +3030,172 @@
     el.btnHistoryEmptyStart.addEventListener("click", goHome);
 
     // 効果音ON/OFF
-// ... existing code ... -->
+    el.btnSoundToggle.addEventListener("click", () => {
+      state.soundEnabled = !state.soundEnabled;
+      saveUserPrefs();
+      syncSettingsUI();
+      if (state.soundEnabled) playTickSound();
+    });
+
+    // 設定モーダル開閉
+    el.btnOpenSettings.addEventListener("click", openSettingsModal);
+    el.btnBannerOpenSettings.addEventListener("click", openSettingsModal);
+    el.btnCloseSettings.addEventListener("click", closeSettingsModal);
+    el.modalSettings.addEventListener("click", (e) => {
+      if (e.target === el.modalSettings) closeSettingsModal();
+    });
+
+    el.btnToggleKeyVis.addEventListener("click", () => {
+      const isPw = el.inputApiKey.type === "password";
+      el.inputApiKey.type = isPw ? "text" : "password";
+      el.btnToggleKeyVis.textContent = isPw ? "🙈" : "👁️";
+    });
+
+    el.btnSaveApikey.addEventListener("click", () => {
+      const key = el.inputApiKey.value.trim();
+      state.userApiKey = key;
+      try {
+        if (key) localStorage.setItem(API_KEY_STORAGE_KEY, key);
+        else localStorage.removeItem(API_KEY_STORAGE_KEY);
+      } catch (e) {}
+      syncSettingsUI();
+      showToast(key ? "🔑 APIキーをブラウザ内に安全に保存したよ！" : "APIキーを削除しました。", key ? "success" : "info");
+    });
+
+    el.btnClearApikey.addEventListener("click", () => {
+      state.userApiKey = "";
+      el.inputApiKey.value = "";
+      try { localStorage.removeItem(API_KEY_STORAGE_KEY); } catch (e) {}
+      el.apikeyTestResult.classList.add("hidden");
+      syncSettingsUI();
+      showToast("保存していたAPIキーを削除しました。", "info");
+    });
+
+    el.btnTestApikey.addEventListener("click", testApiKeyConnection);
+
+    el.toggleIllustHome.addEventListener("change", (e) => setIllustrationEnabled(e.target.checked));
+    el.toggleIllustModal.addEventListener("change", (e) => setIllustrationEnabled(e.target.checked));
+
+    el.btnTogglePwaGuide.addEventListener("click", () => {
+      const hidden = el.pwaGuideContent.classList.contains("hidden");
+      el.pwaGuideContent.classList.toggle("hidden", !hidden);
+      el.pwaGuideArrow.style.transform = hidden ? "rotate(180deg)" : "rotate(0deg)";
+    });
+
+    // ホーム画面設定ボタン群
+    document.querySelectorAll(".timer-opt-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        state.timerSeconds = Number(btn.dataset.seconds);
+        saveUserPrefs();
+        syncTimerButtonsUI();
+      });
+    });
+
+    document.querySelectorAll(".tts-speed-btn, .summary-speed-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        state.ttsSpeed = Number(btn.dataset.speed);
+        saveUserPrefs();
+        syncSpeedButtonsUI();
+      });
+    });
+
+    el.togglePauseSpeech.addEventListener("change", (e) => {
+      state.pauseOnSpeech = e.target.checked;
+      saveUserPrefs();
+    });
+
+    // AIお題生成
+    el.btnGenerateTopic.addEventListener("click", () => generateNewTopicWithAI(el.aiTopicInput.value));
+    el.btnSummaryNewTopic.addEventListener("click", () => {
+      goHome();
+      generateNewTopicWithAI("");
+    });
+
+    // トレーニング開始＆リトライ
+    el.btnStartTraining.addEventListener("click", startNewSession);
+    el.btnSummaryRetry.addEventListener("click", startNewSession);
+
+    // マイク・判定・スキップ・キーボード入力
+    el.btnMic.addEventListener("click", () => {
+      getAudioCtx();
+      if (state.isListening) {
+        stopListening();
+        if (state.latestTranscript) {
+          submitUserAnswer(state.latestTranscript);
+        }
+      } else {
+        startListening();
+      }
+    });
+
+    el.btnEvalNow.addEventListener("click", () => {
+      if (state.latestTranscript) {
+        submitUserAnswer(state.latestTranscript);
+      }
+    });
+
+    el.btnSkip.addEventListener("click", () => {
+      submitUserAnswer("", null, false);
+    });
+
+    el.keyboardForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const val = el.keyboardInput.value.trim();
+      if (!val) return;
+      getAudioCtx();
+      submitUserAnswer(val);
+    });
+
+    // Stage 2 ヒント＆再生成
+    el.btnRegenCurrentImg.addEventListener("click", () => regenerateSingleIllustration(state.currentQuestionIdx));
+    el.btnShowCueHint.addEventListener("click", () => {
+      el.cueHintBox.textContent = `👁️ ${state.currentQuestion?.cue || ""}`;
+      el.cueHintBox.classList.remove("hidden");
+    });
+    el.btnShowJpHint.addEventListener("click", () => {
+      el.jpHintBox.textContent = `💡 ${state.currentQuestion?.jp || ""}`;
+      el.jpHintBox.classList.remove("hidden");
+    });
+
+    // Stage 3 リスニング操作
+    el.btnReplayPrompt.addEventListener("click", () => playStage3AudioPrompt(false));
+    el.btnStage3SpeedToggle.addEventListener("click", () => {
+      state.ttsSpeed = state.ttsSpeed === 1 ? 0.75 : 1;
+      saveUserPrefs();
+      syncSpeedButtonsUI();
+      playStage3AudioPrompt(false);
+    });
+    el.btnShowPromptHint.addEventListener("click", () => {
+      el.stage3PromptHintBox.textContent = `🗣️ ${state.currentQuestion?.promptEn || ""}`;
+      el.stage3PromptHintBox.classList.remove("hidden");
+    });
+
+    // 結果画面ボタン群
+    el.btnNextQuestion.addEventListener("click", loadNextQuestion);
+    el.btnPlayAudio.addEventListener("click", () => {
+      if (state.currentQuestion) speakEnglish(state.currentQuestion.en);
+    });
+    el.btnResultPlayPrompt.addEventListener("click", () => {
+      if (state.currentQuestion?.promptEn) speakEnglish(state.currentQuestion.promptEn);
+    });
+    el.btnResultSpeedToggle.addEventListener("click", () => {
+      state.ttsSpeed = state.ttsSpeed === 1 ? 0.75 : 1;
+      saveUserPrefs();
+      syncSpeedButtonsUI();
+      if (state.currentQuestion) speakEnglish(state.currentQuestion.en);
+    });
+
+    // ステージ間トランジション次へボタン
+    el.btnStartNextStage.addEventListener("click", () => {
+      startStage(state.nextTransitionTarget);
+    });
+
+    // =========================================================================
+    // 17. 初期化
+    // =========================================================================
     window.addEventListener("DOMContentLoaded", () => {
       injectDynamicManifest();
+      initSpeechRecognition();
       loadStats();
       loadHistory();
       loadUserSettings();
